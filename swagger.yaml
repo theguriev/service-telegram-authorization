@@ -1,0 +1,80 @@
+openapi: 3.0.0
+info:
+  title: Telegram Authorization Service
+  version: 1.0.0
+paths:
+  /login:
+    post:
+      summary: Login using Telegram credentials
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: integer
+                  example: 123456789
+                firstName:
+                  type: string
+                  example: John
+                lastName:
+                  type: string
+                  example: Doe
+                username:
+                  type: string
+                  example: johndoe
+                photoUrl:
+                  type: string
+                  example: https://example.com/photo.jpg
+                authDate:
+                  type: integer
+                  example: 1620000000
+                hash:
+                  type: string
+                  example: abcdef123456
+              required:
+                - id
+                - firstName
+                - lastName
+                - username
+                - photoUrl
+                - authDate
+                - hash
+      responses:
+        '200':
+          description: Successful login
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  firstName:
+                    type: string
+                  lastName:
+                    type: string
+                  username:
+                    type: string
+                  photoUrl:
+                    type: string
+                  authDate:
+                    type: integer
+                  hash:
+                    type: string
+                  timestamp:
+                    type: integer
+                  meta:
+                    type: object
+        '403':
+          description: Invalid user hash
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Invalid user hash!
