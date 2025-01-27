@@ -60,5 +60,10 @@ export default eventHandler(async (event) => {
       },
     }
   );
+  const { save } = useTokens({
+    event,
+    userId: _id,
+  });
+  save();
   return await ModelUser.findOne({ _id });
 });

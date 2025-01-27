@@ -70,5 +70,23 @@ describe("Authorization", () => {
         },
       });
     });
+    it("gets 200 on valid second authorization", async () => {
+      const newAuthDate = body.authDate + 100;
+      const newBody = { ...body, authDate: newAuthDate };
+      await $fetch("/login", {
+        baseURL,
+        method: "POST",
+        headers: { Accept: "application/json" },
+        body: {
+          ...newBody,
+          hash: generateTelegramHash(newBody, process.env.NITRO_BOT_TOKEN),
+        },
+        onResponse: ({ response }) => {
+          expect(response.status).toBe(200);
+          expect(response._data).toMatchObject(newBody);
+          accessAndRefreshToBeDefined(response);
+        },
+      });
+    });
   });
 });
