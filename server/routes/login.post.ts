@@ -40,7 +40,6 @@ export default eventHandler(async (event) => {
       event,
       userId,
     });
-    // return true;
     save();
     return userDocument;
   }
