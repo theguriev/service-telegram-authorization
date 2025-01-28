@@ -14,14 +14,17 @@ const zodValidateData = async <T>(
   fn: ValidateFunction<T>
 ): Promise<T> => {
   try {
-    const res = await fn(data);
+    const res = (await fn(data)) as T | false | undefined;
     if (res === false) {
       throw createValidationError();
     }
     if (res === true) {
       return data as T;
     }
-    return res ?? (data as T);
+    if (res === undefined) {
+      throw createValidationError();
+    }
+    return res;
   } catch (error) {
     throw createValidationError(error);
   }
