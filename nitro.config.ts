@@ -7,7 +7,7 @@ export default defineNitroConfig({
   compatibilityDate: "2025-01-26",
   runtimeConfig: {
     mongoUri: "mongodb://root:example@localhost:27017/",
-    botToken: "7826411058:AAEZYZPTy4hYe3WLDhhSL79VLMwvlw2JHbc",
+    botToken: "",
     secret: "gurievcreative",
   },
   imports: {
