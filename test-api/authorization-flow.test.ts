@@ -26,7 +26,7 @@ const accessAndRefreshToBeDefined = (response: FetchResponse<any>) => {
   expect(accessTokenObj).toBeDefined();
 };
 
-describe("Authorization", () => {
+describe.sequential("Authorization", () => {
   let validRefreshToken: Cookie;
   let validAccessToken: Cookie;
   describe("POST /login", () => {
@@ -126,6 +126,35 @@ describe("Authorization", () => {
         },
         onResponse: ({ response }) => {
           expect(response.status).toBe(200);
+        },
+      });
+    });
+  });
+
+  describe("GET /refresh", () => {
+    it("gets 404 on invalid refresh token", async () => {
+      await $fetch("/refresh", {
+        baseURL: "http://localhost:3000",
+        headers: { Accept: "application/json" },
+        ignoreResponseError: true,
+        onResponse: ({ response }) => {
+          expect(response.status).toBe(404);
+          expect(response._data).toMatchObject({
+            message: "Refresh token not found!",
+          });
+        },
+      });
+    });
+    it("gets 200 on valid refresh token", async () => {
+      await $fetch("/refresh", {
+        baseURL: "http://localhost:3000",
+        headers: {
+          Accept: "application/json",
+          Cookie: `refreshToken=${validRefreshToken.value}`,
+        },
+        onResponse: ({ response }) => {
+          expect(response.status).toBe(200);
+          accessAndRefreshToBeDefined(response);
         },
       });
     });
