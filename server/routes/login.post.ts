@@ -12,7 +12,6 @@ export default eventHandler(async (event) => {
   const { botToken } = useRuntimeConfig();
   const { id, authDate, firstName, hash, lastName, photoUrl, username } =
     await zodValidateBody(event, requestBodySchema.parse);
-
   const valid = isValidTelegramHash(
     { id, firstName, lastName, username, photoUrl, authDate, hash },
     botToken
