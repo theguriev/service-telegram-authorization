@@ -1,3 +1,4 @@
+import type { Cookie } from "set-cookie-parser";
 import type { FetchResponse } from "ofetch";
 
 const baseURL = "http://localhost:3000";
@@ -26,6 +27,8 @@ const accessAndRefreshToBeDefined = (response: FetchResponse<any>) => {
 };
 
 describe("Authorization", () => {
+  let validRefreshToken: Cookie;
+  let validAccessToken: Cookie;
   describe("POST /login", () => {
     it("gets 400 on validation errors", async () => {
       await $fetch("/login", {
@@ -64,6 +67,15 @@ describe("Authorization", () => {
           hash,
         },
         onResponse: ({ response }) => {
+          const setCookie = extractSetCookie(response.headers);
+          const refreshTokenObj = setCookie.find(
+            (cookie) => cookie.name === "refreshToken"
+          );
+          const accessTokenObj = setCookie.find(
+            (cookie) => cookie.name === "accessToken"
+          );
+          validRefreshToken = refreshTokenObj!;
+          validAccessToken = accessTokenObj!;
           expect(response.status).toBe(200);
           expect(response._data).toMatchObject(body);
           accessAndRefreshToBeDefined(response);
@@ -85,6 +97,35 @@ describe("Authorization", () => {
           expect(response.status).toBe(200);
           expect(response._data).toMatchObject(newBody);
           accessAndRefreshToBeDefined(response);
+        },
+      });
+    });
+  });
+
+  describe("GET /", () => {
+    it("gets 500 on wrong access token", async () => {
+      await $fetch("/", {
+        baseURL: "http://localhost:3000",
+        headers: {
+          Accept: "application/json",
+          Cookie: "accessToken=invalid;",
+        },
+        ignoreResponseError: true,
+        onResponse: ({ response }) => {
+          expect(response.status).toBe(500);
+        },
+      });
+    });
+
+    it("gets 200 valid user", async () => {
+      await $fetch("/", {
+        baseURL: "http://localhost:3000",
+        headers: {
+          Accept: "application/json",
+          Cookie: `accessToken=${validAccessToken.value};`,
+        },
+        onResponse: ({ response }) => {
+          expect(response.status).toBe(200);
         },
       });
     });

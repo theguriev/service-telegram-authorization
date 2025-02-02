@@ -7,6 +7,7 @@ declare global {
   const expect: typeof import('vitest')['expect']
   const extractSetCookie: typeof import('/Users/gurieveugen/work/service-telegram-authorization/server/utils/extractSetCookie')['default']
   const generateTelegramHash: typeof import('/Users/gurieveugen/work/service-telegram-authorization/server/utils/generateTelegramHash')['default']
+  const getUserId: typeof import('/Users/gurieveugen/work/service-telegram-authorization/server/utils/getUserId')['default']
   const isValidTelegramHash: typeof import('/Users/gurieveugen/work/service-telegram-authorization/server/utils/isValidTelegramHash')['default']
   const issueAccessToken: typeof import('/Users/gurieveugen/work/service-telegram-authorization/server/utils/issueAccessToken')['default']
   const issueRefreshToken: typeof import('/Users/gurieveugen/work/service-telegram-authorization/server/utils/issueRefreshToken')['default']
@@ -14,6 +15,7 @@ declare global {
   const parse: typeof import('set-cookie-parser')['parse']
   const passwordHash: typeof import('/Users/gurieveugen/work/service-telegram-authorization/server/utils/passwordHash')['default']
   const uuidv4: typeof import('uuid')['v4']
+  const verify: typeof import('/Users/gurieveugen/work/service-telegram-authorization/server/utils/verify')['default']
   const zodValidateBody: typeof import('/Users/gurieveugen/work/service-telegram-authorization/server/utils/zodValidateBody')['default']
   const zodValidateData: typeof import('/Users/gurieveugen/work/service-telegram-authorization/server/utils/zodValidateData')['default']
 }
