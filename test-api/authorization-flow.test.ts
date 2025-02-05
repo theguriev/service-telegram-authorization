@@ -159,4 +159,23 @@ describe.sequential("Authorization", () => {
       });
     });
   });
+
+  describe("PUT /update-meta", () => {
+    it("changes the user name", async () => {
+      await $fetch("/update-meta", {
+        baseURL: "http://localhost:3000",
+        method: "PUT",
+        headers: {
+          Accept: "application/json",
+          Cookie: `accessToken=${validAccessToken.value}`,
+        },
+        body: { meta: { firstName: "John", lastName: "Doe" } },
+        onResponse: ({ response }) => {
+          expect(response.status).toBe(200);
+          expect(response._data.meta.firstName).toBe("John");
+          expect(response._data.meta.lastName).toBe("Doe");
+        },
+      });
+    });
+  });
 });
