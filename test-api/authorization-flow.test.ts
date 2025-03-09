@@ -13,6 +13,8 @@ const body = {
 };
 
 const hash = generateTelegramHash(body, process.env.NITRO_BOT_TOKEN);
+let validRefreshToken: string;
+let validAccessToken: string;
 
 const accessAndRefreshToBeDefined = (response: FetchResponse<any>) => {
   const setCookie = extractSetCookie(response.headers);
@@ -27,8 +29,6 @@ const accessAndRefreshToBeDefined = (response: FetchResponse<any>) => {
 };
 
 describe.sequential("Authorization", () => {
-  let validRefreshToken: Cookie;
-  let validAccessToken: Cookie;
   describe("POST /login", () => {
     it("gets 400 on validation errors", async () => {
       await $fetch("/login", {
@@ -74,8 +74,8 @@ describe.sequential("Authorization", () => {
           const accessTokenObj = setCookie.find(
             (cookie) => cookie.name === "accessToken"
           );
-          validRefreshToken = refreshTokenObj!;
-          validAccessToken = accessTokenObj!;
+          validRefreshToken = refreshTokenObj.value;
+          validAccessToken = accessTokenObj.value;
           expect(response.status).toBe(200);
           expect(response._data).toMatchObject(body);
           accessAndRefreshToBeDefined(response);
@@ -122,7 +122,7 @@ describe.sequential("Authorization", () => {
         baseURL: "http://localhost:3000",
         headers: {
           Accept: "application/json",
-          Cookie: `accessToken=${validAccessToken.value};`,
+          Cookie: `accessToken=${validAccessToken};`,
         },
         onResponse: ({ response }) => {
           expect(response.status).toBe(200);
@@ -150,7 +150,7 @@ describe.sequential("Authorization", () => {
         baseURL: "http://localhost:3000",
         headers: {
           Accept: "application/json",
-          Cookie: `refreshToken=${validRefreshToken.value}`,
+          Cookie: `refreshToken=${validRefreshToken}`,
         },
         onResponse: ({ response }) => {
           expect(response.status).toBe(200);
@@ -167,7 +167,7 @@ describe.sequential("Authorization", () => {
         method: "PUT",
         headers: {
           Accept: "application/json",
-          Cookie: `accessToken=${validAccessToken.value}`,
+          Cookie: `accessToken=${validAccessToken}`,
         },
         body: { meta: { firstName: "John", lastName: "Doe" } },
         onResponse: ({ response }) => {

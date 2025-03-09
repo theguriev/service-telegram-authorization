@@ -1,6 +1,4 @@
-import sha256 from "crypto-js/sha256";
-import HmacSHA256 from "crypto-js/hmac-sha256";
-import encHex from "crypto-js/enc-hex";
+import crypto from "crypto";
 import { snakeCase } from "scule";
 
 const generateTelegramHash = (
@@ -8,7 +6,7 @@ const generateTelegramHash = (
   token: string
 ) => {
   // Create the secret key
-  const secret = sha256(token);
+  const secret = crypto.createHash("sha256").update(token).digest();
 
   // Sort and concatenate the data, excluding the "hash"
   const array = Object.entries(data).reduce<string[]>((acc, [key, value]) => {
@@ -19,7 +17,10 @@ const generateTelegramHash = (
   }, []);
 
   // Generate the HMAC hash
-  return HmacSHA256(array.sort().join("\n"), secret).toString(encHex);
+  return crypto
+    .createHmac("sha256", secret)
+    .update(array.sort().join("\n"))
+    .digest("hex");
 };
 
 export default generateTelegramHash;
