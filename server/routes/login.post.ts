@@ -1,9 +1,9 @@
 const requestBodySchema = z.object({
   id: z.number(),
   firstName: z.string(),
-  lastName: z.string(),
-  username: z.string(),
-  photoUrl: z.string(),
+  lastName: z.string().nullish(),
+  username: z.string().nullish(),
+  photoUrl: z.string().nullish(),
   authDate: z.number(),
   hash: z.string(),
 });
