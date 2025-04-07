@@ -57,6 +57,22 @@ describe.sequential("Authorization", () => {
         },
       });
     });
+    it("gets 200 on valid for user without lastName", async () => {
+      const newBody = { ...body, lastName: null };
+      await $fetch("/login", {
+        baseURL,
+        method: "POST",
+        headers: { Accept: "application/json" },
+        body: {
+          ...newBody,
+          hash: generateTelegramHash(newBody, process.env.NITRO_BOT_TOKEN),
+        },
+        onResponse: ({ response }) => {
+          expect(response.status).toBe(200);
+          expect(response._data).toMatchObject(newBody);
+        },
+      });
+    });
     it("gets 200 on valid user hash", async () => {
       await $fetch("/login", {
         baseURL,
