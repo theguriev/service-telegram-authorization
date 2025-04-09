@@ -10,7 +10,7 @@ const generateTelegramHash = (
 
   // Sort and concatenate the data, excluding the "hash"
   const array = Object.entries(data).reduce<string[]>((acc, [key, value]) => {
-    if (key !== "hash") {
+    if (key !== "hash" && value) {
       acc.push(`${snakeCase(key)}=${value}`);
     }
     return acc;
