@@ -1,4 +1,3 @@
-import type { Cookie } from "set-cookie-parser";
 import type { FetchResponse } from "ofetch";
 
 const baseURL = "http://localhost:3000";
@@ -142,6 +141,51 @@ describe.sequential("Authorization", () => {
         },
         onResponse: ({ response }) => {
           expect(response.status).toBe(200);
+        },
+      });
+    });
+  });
+
+  describe("POST /login/web-app", () => {
+    it("gets 400 on validation errors", async () => {
+      await $fetch("/login/web-app", {
+        baseURL,
+        method: "POST",
+        ignoreResponseError: true,
+        headers: { Accept: "application/json" },
+        body: { query_id: "test" },
+        onResponse: ({ response }) => {
+          expect(response.status).toBe(400);
+        },
+      });
+    });
+
+    it("gets 200 on valid web app authorization", async () => {
+      const newBody = {
+        queryId: "AAEXTKEWAAAAABdMoRawpVCK",
+        user: JSON.stringify(body),
+        authDate: 1745179538,
+        signature:
+          "zQf7zeXzKVekQpFT8Zxuf7_gxIuj3xAdo1ZtZn2_gEP4lHJgt0KUeBIEH6iAJp--n56H7ZHXYxco1zpW2a5CAA",
+      };
+
+      await $fetch("/login/web-app", {
+        baseURL,
+        method: "POST",
+        headers: { Accept: "application/json" },
+        body: {
+          ...newBody,
+          hash: generateTelegramHash(newBody, process.env.NITRO_BOT_TOKEN),
+        },
+        onResponse: ({ response }) => {
+          expect(response.status).toBe(200);
+          const userData = JSON.parse(newBody.user);
+          expect(response._data).toMatchObject({
+            id: userData.id,
+            firstName: userData.firstName,
+            username: userData.username,
+          });
+          accessAndRefreshToBeDefined(response);
         },
       });
     });

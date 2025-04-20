@@ -1,5 +1,5 @@
 const isValidTelegramHash = (
-  data?: InferSchemaType<typeof schemaUser>,
+  data?: Record<string, string | number>,
   token?: string
 ) => {
   if (!data || !token) {

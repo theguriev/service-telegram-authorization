@@ -2,7 +2,7 @@ import crypto from "crypto";
 import { snakeCase } from "scule";
 
 const generateTelegramHash = (
-  data: InferSchemaType<typeof schemaUser>,
+  data: Record<string, string | number>,
   token: string
 ) => {
   // Create the secret key

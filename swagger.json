@@ -149,6 +149,50 @@
           }
         }
       }
+    },
+    "/login/web-app": {
+      "post": {
+        "tags": ["auth"],
+        "summary": "Login with Telegram Web App data",
+        "description": "Authenticate a user with Telegram Web App credentials",
+        "operationId": "loginWebApp",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TelegramWebAppLoginRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful login",
+            "headers": {
+              "Set-Cookie": {
+                "schema": {
+                  "type": "string",
+                  "example": "accessToken=xyz; refreshToken=abc"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error"
+          },
+          "403": {
+            "description": "Invalid signature"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -185,12 +229,7 @@
             "example": "abcdef123456"
           }
         },
-        "required": [
-          "id",
-          "firstName",
-          "authDate",
-          "hash"
-        ]
+        "required": ["id", "firstName", "authDate", "hash"]
       },
       "UserResponse": {
         "type": "object",
@@ -252,6 +291,33 @@
           "message": {
             "type": "string",
             "example": "User logged out successfully"
+          }
+        }
+      },
+      "TelegramWebAppLoginRequest": {
+        "type": "object",
+        "required": ["queryId", "user", "authDate", "signature"],
+        "properties": {
+          "queryId": {
+            "type": "string",
+            "example": "AAEXTKEWAAAAABdMoRawpVCK"
+          },
+          "user": {
+            "type": "string",
+            "description": "JSON string containing user information",
+            "example": "{\"id\":379669527,\"first_name\":\"eugen\",\"last_name\":\"\",\"username\":\"theguriev\",\"language_code\":\"en\",\"allows_write_to_pm\":true,\"photo_url\":\"https://t.me/i/userpic/320/example.jpg\"}"
+          },
+          "authDate": {
+            "type": "integer",
+            "example": 1745179538
+          },
+          "signature": {
+            "type": "string",
+            "example": "zQf7zeXzKVekQpFT8Zxuf7_gxIuj3xAdo1ZtZn2_gEP4lHJgt0KUeBIEH6iAJp--n56H7ZHXYxco1zpW2a5CAA"
+          },
+          "hash": {
+            "type": "string",
+            "example": "217946472939261db8e248b313882b9ab3ed4e7ce5f1de25996d51aba52a1bfc"
           }
         }
       }

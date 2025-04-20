@@ -16,6 +16,7 @@ export default defineNitroConfig({
       ...(await importsHelper("./db/schema", camelCase)),
       { name: "InferSchemaType", from: "mongoose", type: true },
       { name: "parse", from: "set-cookie-parser" },
+      { name: "destr", from: "destr" },
     ],
     presets: [
       {
