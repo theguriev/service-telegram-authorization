@@ -175,7 +175,11 @@ describe.sequential("Authorization", () => {
         headers: { Accept: "application/json" },
         body: {
           ...newBody,
-          hash: generateTelegramHash(newBody, process.env.NITRO_BOT_TOKEN),
+          hash: generateTelegramHash(
+            newBody,
+            process.env.NITRO_BOT_TOKEN,
+            true
+          ),
         },
         onResponse: ({ response }) => {
           expect(response.status).toBe(200);

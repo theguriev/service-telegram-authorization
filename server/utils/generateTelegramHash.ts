@@ -3,10 +3,13 @@ import { snakeCase } from "scule";
 
 const generateTelegramHash = (
   data: Record<string, string | number>,
-  token: string
+  token: string,
+  webApp?: boolean
 ) => {
   // Create the secret key
-  const secret = crypto.createHash("sha256").update(token).digest();
+  const secret = webApp
+    ? crypto.createHmac("sha256", "WebAppData").update(token).digest()
+    : crypto.createHash("sha256").update(token).digest();
 
   // Sort and concatenate the data, excluding the "hash"
   const array = Object.entries(data).reduce<string[]>((acc, [key, value]) => {

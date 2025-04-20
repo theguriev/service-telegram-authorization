@@ -14,7 +14,8 @@ export default eventHandler(async (event) => {
   );
   const valid = isValidTelegramHash(
     { queryId, user, authDate, signature, hash },
-    botToken
+    botToken,
+    true
   );
 
   const {
