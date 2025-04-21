@@ -20,11 +20,15 @@ const useTokens = ({
   setCookie(event, "refreshToken", refreshToken, {
     httpOnly: true,
     expires: expiresRefreshToken,
+    sameSite: "none",
+    secure: true,
   });
 
   setCookie(event, "accessToken", accessToken, {
     httpOnly: true,
     expires: expiresAccessToken,
+    sameSite: "none",
+    secure: true,
   });
 
   const save = async () => {
