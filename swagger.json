@@ -262,7 +262,9 @@
             "type": "integer"
           },
           "meta": {
-            "type": "object"
+            "type": "object",
+            "additionalProperties": true,
+            "description": "User metadata with arbitrary properties"
           }
         }
       },
