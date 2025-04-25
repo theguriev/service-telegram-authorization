@@ -263,8 +263,10 @@
           },
           "meta": {
             "type": "object",
-            "additionalProperties": true,
-            "description": "User metadata with arbitrary properties"
+            "additionalProperties": {
+              "oneOf": [{ "type": "string" }, { "type": "number" }]
+            },
+            "description": "User metadata where keys are strings and values can be strings or numbers."
           }
         }
       },
@@ -273,7 +275,10 @@
         "properties": {
           "meta": {
             "type": "object",
-            "additionalProperties": true
+            "additionalProperties": {
+              "oneOf": [{ "type": "string" }, { "type": "number" }]
+            },
+            "description": "User metadata where keys are strings and values can be strings or numbers."
           }
         },
         "required": ["meta"]
