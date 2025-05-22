@@ -30,7 +30,6 @@ export default eventHandler(async (event) => {
       lastName,
       photoUrl,
       username,
-      timestamp: Date.now(),
       meta: {},
     });
     const userSaved = await userDocument.save();

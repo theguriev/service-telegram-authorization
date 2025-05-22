@@ -258,8 +258,13 @@
           "hash": {
             "type": "string"
           },
-          "timestamp": {
-            "type": "integer"
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
           },
           "meta": {
             "type": "object",
