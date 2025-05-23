@@ -47,6 +47,12 @@ const ctx: Context = {
     NITRO_BOT_TOKEN: "7826411058:AAEZYZPTy4hYe3WLDhhSL79VLMwvlw2JHbc",
     CUSTOM_HELLO_THERE: "general",
     SECRET: "gurievcreative",
+    PORT: "4000",
+    API_URL: "http://localhost:4000",
+    VALID_ACCESS_TOKEN: issueAccessToken(
+      { userId: 123 },
+      { secret: "gurievcreative" }
+    ),
   },
   fetch: (url, opts): Promise<Response> =>
     $fetch(joinURL(ctx.server!.url, url.slice(1)), {

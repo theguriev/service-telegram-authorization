@@ -1,6 +1,5 @@
 import type { FetchResponse } from "ofetch";
 
-const baseURL = "http://localhost:3000";
 const body = {
   id: 379669527,
   firstName: "eugen",
@@ -31,7 +30,7 @@ describe.sequential("Authorization", () => {
   describe("POST /login", () => {
     it("gets 400 on validation errors", async () => {
       await $fetch("/login", {
-        baseURL,
+        baseURL: process.env.API_URL,
         method: "POST",
         ignoreResponseError: true,
         headers: { Accept: "application/json" },
@@ -43,7 +42,7 @@ describe.sequential("Authorization", () => {
     });
     it("gets 403 on invalid user hash", async () => {
       await $fetch("/login", {
-        baseURL,
+        baseURL: process.env.API_URL,
         method: "POST",
         headers: { Accept: "application/json" },
         ignoreResponseError: true,
@@ -59,7 +58,7 @@ describe.sequential("Authorization", () => {
     it("gets 200 on valid for user without lastName", async () => {
       const newBody = { ...body, lastName: null };
       await $fetch("/login", {
-        baseURL,
+        baseURL: process.env.API_URL,
         method: "POST",
         headers: { Accept: "application/json" },
         body: {
@@ -74,7 +73,7 @@ describe.sequential("Authorization", () => {
     });
     it("gets 200 on valid user hash", async () => {
       await $fetch("/login", {
-        baseURL,
+        baseURL: process.env.API_URL,
         method: "POST",
         headers: { Accept: "application/json" },
         body: {
@@ -101,7 +100,7 @@ describe.sequential("Authorization", () => {
       const newAuthDate = body.authDate + 100;
       const newBody = { ...body, authDate: newAuthDate };
       await $fetch("/login", {
-        baseURL,
+        baseURL: process.env.API_URL,
         method: "POST",
         headers: { Accept: "application/json" },
         body: {
@@ -120,7 +119,7 @@ describe.sequential("Authorization", () => {
   describe("GET /", () => {
     it("gets 500 on wrong access token", async () => {
       await $fetch("/", {
-        baseURL: "http://localhost:3000",
+        baseURL: process.env.API_URL,
         headers: {
           Accept: "application/json",
           Cookie: "accessToken=invalid;",
@@ -134,7 +133,7 @@ describe.sequential("Authorization", () => {
 
     it("gets 200 valid user", async () => {
       await $fetch("/", {
-        baseURL: "http://localhost:3000",
+        baseURL: process.env.API_URL,
         headers: {
           Accept: "application/json",
           Cookie: `accessToken=${validAccessToken};`,
@@ -149,7 +148,7 @@ describe.sequential("Authorization", () => {
   describe("POST /login/web-app", () => {
     it("gets 400 on validation errors", async () => {
       await $fetch("/login/web-app", {
-        baseURL,
+        baseURL: process.env.API_URL,
         method: "POST",
         ignoreResponseError: true,
         headers: { Accept: "application/json" },
@@ -170,7 +169,7 @@ describe.sequential("Authorization", () => {
       };
 
       await $fetch("/login/web-app", {
-        baseURL,
+        baseURL: process.env.API_URL,
         method: "POST",
         headers: { Accept: "application/json" },
         body: {
@@ -198,7 +197,7 @@ describe.sequential("Authorization", () => {
   describe("GET /refresh", () => {
     it("gets 404 on invalid refresh token", async () => {
       await $fetch("/refresh", {
-        baseURL: "http://localhost:3000",
+        baseURL: process.env.API_URL,
         headers: { Accept: "application/json" },
         ignoreResponseError: true,
         onResponse: ({ response }) => {
@@ -211,7 +210,7 @@ describe.sequential("Authorization", () => {
     });
     it("gets 200 on valid refresh token", async () => {
       await $fetch("/refresh", {
-        baseURL: "http://localhost:3000",
+        baseURL: process.env.API_URL,
         headers: {
           Accept: "application/json",
           Cookie: `refreshToken=${validRefreshToken}`,
@@ -227,7 +226,7 @@ describe.sequential("Authorization", () => {
   describe("PUT /update-meta", () => {
     it("changes the user name", async () => {
       await $fetch("/update-meta", {
-        baseURL: "http://localhost:3000",
+        baseURL: process.env.API_URL,
         method: "PUT",
         headers: {
           Accept: "application/json",
