@@ -9,6 +9,7 @@ const userSchema = new Schema(
     photoUrl: String,
     authDate: Number,
     hash: String,
+    role: String,
     meta: {
       type: Map,
       of: Schema.Types.Mixed,
