@@ -193,6 +193,109 @@
           }
         }
       }
+    },
+    "/users": {
+      "get": {
+        "tags": ["users"],
+        "summary": "List users with optional search and pagination",
+        "description": "Retrieves a list of users. Requires admin privileges. Supports pagination and search by first or last name.",
+        "operationId": "listUsers",
+        "parameters": [
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Number of records to skip for pagination",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0,
+              "minimum": 0
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Maximum number of records to return",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 10,
+              "minimum": 1
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "description": "Search term to filter users by first name or last name (case-insensitive)",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of users",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserResponse"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Invalid query parameters (e.g., offset, limit)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Missing or invalid authentication token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - User does not have admin privileges",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ]
+      }
     }
   },
   "components": {
@@ -332,6 +435,13 @@
             "example": "217946472939261db8e248b313882b9ab3ed4e7ce5f1de25996d51aba52a1bfc"
           }
         }
+      }
+    },
+    "securitySchemes": {
+      "cookieAuth": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "accessToken"
       }
     }
   }
