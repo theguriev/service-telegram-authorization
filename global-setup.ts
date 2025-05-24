@@ -1,20 +1,22 @@
-import { tmpdir } from "node:os";
-import { promises as fsp } from "node:fs";
+import { listen, Listener } from "listhen";
+import { fileURLToPath } from "mlly";
+import { MongoMemoryServer } from "mongodb-memory-server";
+import mongoose from "mongoose";
+import type { Nitro } from "nitropack";
 import {
-  createNitro,
   build,
-  prepare,
   copyPublicAssets,
+  createNitro,
+  prepare,
   prerender,
 } from "nitropack";
-import type { Nitro } from "nitropack";
-import { join, resolve } from "pathe";
-import { listen, Listener } from "listhen";
-import { $fetch } from "ofetch";
+import { promises as fsp } from "node:fs";
+import { tmpdir } from "node:os";
 import type { FetchOptions } from "ofetch";
-import { fileURLToPath } from "mlly";
+import { $fetch } from "ofetch";
+import { join, resolve } from "pathe";
 import { joinURL } from "ufo";
-import { MongoMemoryServer } from "mongodb-memory-server";
+import { clearTestData, seedTestData } from "./test-db-setup";
 
 interface Context {
   preset: string;
@@ -62,13 +64,20 @@ const ctx: Context = {
     }),
 };
 
+let mongod: MongoMemoryServer;
+
 export const setup = async () => {
   await fsp.rm(presetTmpDir, { recursive: true }).catch(() => {});
   await fsp.mkdir(presetTmpDir, { recursive: true });
 
-  const mongod = await MongoMemoryServer.create();
+  mongod = await MongoMemoryServer.create();
   ctx.mongo = mongod;
   ctx.env.NITRO_MONGO_URI = mongod.getUri();
+
+  await mongoose.connect(ctx.env.NITRO_MONGO_URI);
+
+  await clearTestData();
+  await seedTestData();
 
   // Set environment variables for process compatible presets
   for (const [name, value] of Object.entries(ctx.env)) {
@@ -104,6 +113,8 @@ export const setup = async () => {
 };
 
 export const teardown = async () => {
+  await mongoose.disconnect();
+  await mongod.stop();
   if (teardownHappened) {
     throw new Error("teardown called twice");
   }
