@@ -5,21 +5,19 @@ const requestBodySchema = z.object({
 export default eventHandler(async (event) => {
   const _id = await getUserId(event);
   const { meta } = await zodValidateBody(event, requestBodySchema.parse);
-  await ModelUser.updateOne(
-    {
-      _id,
-    },
-    {
-      $set: {
-        meta,
-      },
-    }
-  );
-  const userExist = await ModelUser.findOne({
+  const user = await ModelUser.findOne({
     _id,
   });
-  if (userExist === null) {
+  if (user === null) {
     throw createError({ message: "User not exists!", status: 409 });
   }
-  return userExist;
+
+  const previousMeta = user.meta;
+  user.meta = new Map(Object.entries(meta));
+  user.save();
+
+  if (previousMeta?.get("managerId") !== user.meta?.get("managerId")) {
+    user._id
+  }
+  return user;
 });

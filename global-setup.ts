@@ -4,11 +4,11 @@ import { MongoMemoryServer } from "mongodb-memory-server";
 import mongoose from "mongoose";
 import type { Nitro } from "nitropack";
 import {
-  build,
-  copyPublicAssets,
-  createNitro,
-  prepare,
-  prerender,
+    build,
+    copyPublicAssets,
+    createNitro,
+    prepare,
+    prerender,
 } from "nitropack";
 import { promises as fsp } from "node:fs";
 import { tmpdir } from "node:os";
@@ -16,8 +16,8 @@ import type { FetchOptions } from "ofetch";
 import { $fetch } from "ofetch";
 import { join, resolve } from "pathe";
 import { joinURL } from "ufo";
-import { clearTestData, seedTestData } from "./test-db-setup";
 import { adminId, regularId } from "./constants";
+import { clearTestData, seedTestData } from "./test-db-setup";
 
 interface Context {
   preset: string;
@@ -48,6 +48,8 @@ const ctx: Context = {
   outDir: resolve(fixtureDir, presetTmpDir, ".output"),
   env: {
     NITRO_BOT_TOKEN: "7826411058:AAEZYZPTy4hYe3WLDhhSL79VLMwvlw2JHbc",
+    NITRO_WALLET_PRIVATE_KEY: "0x9383e92c466fa0da64f1892d3b761172641296543d4765128446009885268f95",
+    NITRO_NOTIFICATION_BASE: "http://localhost:4000",
     CUSTOM_HELLO_THERE: "general",
     SECRET: "gurievcreative",
     PORT: "4000",
