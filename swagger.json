@@ -411,7 +411,7 @@
       },
       "TelegramWebAppLoginRequest": {
         "type": "object",
-        "required": ["queryId", "user", "authDate", "signature"],
+        "required": ["user", "authDate", "signature"],
         "properties": {
           "queryId": {
             "type": "string",
@@ -433,6 +433,26 @@
           "hash": {
             "type": "string",
             "example": "217946472939261db8e248b313882b9ab3ed4e7ce5f1de25996d51aba52a1bfc"
+          },
+          "canSendAfter": {
+            "type": "integer",
+            "example": 1745179538
+          },
+          "chat": {
+            "type": "string"
+          },
+          "chatType": {
+            "type": "string",
+            "enum": ["sender", "private", "group", "supergroup", "channel"]
+          },
+          "chatInstance": {
+            "type": "string"
+          },
+          "receiver": {
+            "type": "string"
+          },
+          "startParam": {
+            "type": "string"
           }
         }
       }

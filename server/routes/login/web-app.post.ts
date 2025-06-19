@@ -1,23 +1,30 @@
 const requestBodySchema = z.object({
-  queryId: z.string(),
-  user: z.string(),
+  queryId: z.string().optional(),
+  user: z.string().optional(),
   authDate: z.number(),
   signature: z.string(),
   hash: z.string(),
+  canSendAfter: z.number().optional(),
+  chat: z.string().optional(),
+  chatType: z.enum(["sender", "private", "group", "supergroup", "channel"]).optional(),
+  chatInstance: z.string().optional(),
+  receiver: z.string().optional(),
+  startParam: z.string().optional(),
 });
 
 export default eventHandler(async (event) => {
   const { botToken } = useRuntimeConfig();
-  const { queryId, user, authDate, signature, hash } = await zodValidateBody(
+  const validated = await zodValidateBody(
     event,
     requestBodySchema.parse
   );
   const valid = isValidTelegramHash(
-    { queryId, user, authDate, signature, hash },
+    validated,
     botToken,
     true
   );
 
+  const { user, authDate, hash } = validated;
   const {
     id,
     first_name: firstName,
