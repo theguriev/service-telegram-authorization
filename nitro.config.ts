@@ -9,6 +9,15 @@ export default defineNitroConfig({
     mongoUri: "mongodb://root:example@localhost:27017/",
     botToken: "",
     secret: "gurievcreative",
+    walletPrivateKey: "",
+    notificationBase: "http://localhost:4000",
+  },
+  experimental: {
+    tasks: true,
+  },
+  scheduledTasks: {
+    '0 0 * * *': ['wallet:daily'],
+    '0 10 * * *': ['wallet:manager-daily'],
   },
   imports: {
     imports: [
