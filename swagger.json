@@ -411,7 +411,7 @@
       },
       "TelegramWebAppLoginRequest": {
         "type": "object",
-        "required": ["user", "authDate", "signature"],
+        "required": ["hash", "authDate", "signature"],
         "properties": {
           "queryId": {
             "type": "string",

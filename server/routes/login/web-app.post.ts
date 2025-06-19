@@ -24,7 +24,7 @@ export default eventHandler(async (event) => {
     true
   );
 
-  const { user, authDate, hash } = validated;
+  const { user, receiver, authDate, hash } = validated;
   const {
     id,
     first_name: firstName,
@@ -39,7 +39,7 @@ export default eventHandler(async (event) => {
     language_code: string;
     allows_write_to_pm: boolean;
     photo_url: string;
-  }>(user);
+  }>(user ?? receiver);
 
   if (!valid) {
     throw createError({ message: "Invalid user hash!", status: 403 });
