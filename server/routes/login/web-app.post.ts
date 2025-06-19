@@ -25,6 +25,9 @@ export default eventHandler(async (event) => {
   );
 
   const { user, receiver, authDate, hash } = validated;
+  if (!user && !receiver) {
+    throw createError({ message: "Either 'user' or 'receiver' must be provided.", status: 400 });
+  }
   const {
     id,
     first_name: firstName,
