@@ -3,7 +3,6 @@ const requestBodySchema = z.object({
 });
 
 export default eventHandler(async (event) => {
-  const { walletPrivateKey } = useRuntimeConfig();
   const _id = await getUserId(event);
   const { meta } = await zodValidateBody(event, requestBodySchema.parse);
   const user = await ModelUser.findOne({
@@ -13,12 +12,8 @@ export default eventHandler(async (event) => {
     throw createError({ message: "User not exists!", status: 409 });
   }
 
-  const previousMeta = user.meta;
   user.meta = new Map(Object.entries(meta));
   user.save();
 
-  if (previousMeta?.get("managerId") !== user.meta?.get("managerId")) {
-    createWallet(user._id, walletPrivateKey);
-  }
   return user;
 });
