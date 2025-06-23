@@ -34,14 +34,17 @@ export default eventHandler(async (event) => {
     });
     const userSaved = await userDocument.save();
     const userId = userSaved._id.toString();
+    const role = userSaved.role || "user";
     const { save } = useTokens({
       event,
       userId,
+      role,
     });
     save();
     return userDocument;
   }
   const _id = userRecord._id.toString();
+  const role = userRecord.role || "user";
   await ModelUser.updateOne(
     {
       _id,
@@ -61,6 +64,7 @@ export default eventHandler(async (event) => {
   const { save } = useTokens({
     event,
     userId: _id,
+    role,
   });
   save();
   return await ModelUser.findOne({ _id });
