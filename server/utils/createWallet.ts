@@ -1,8 +1,7 @@
 import { Wallet } from "ethers";
 import { Types } from "mongoose";
-import sendTransaction from "./sendTransaction";
 
-const createWallet = async (userId: Types.ObjectId, walletPrivateKey: string) => {
+const createWallet = async (userId: Types.ObjectId) => {
   let walletModel = await ModelWallet.findOne({ userId });
   if (!walletModel) {
     const wallet = Wallet.createRandom();
@@ -10,8 +9,6 @@ const createWallet = async (userId: Types.ObjectId, walletPrivateKey: string) =>
       privateKey: wallet.privateKey,
       userId,
     });
-
-    await sendTransaction(walletPrivateKey, wallet.privateKey, 61, 'Initial wallet funding');
   }
   return walletModel;
 };

@@ -41,6 +41,9 @@ export default eventHandler(async (event) => {
       role,
     });
     save();
+
+    await createWallet(userSaved._id);
+
     return userDocument;
   }
   const _id = userRecord._id.toString();
