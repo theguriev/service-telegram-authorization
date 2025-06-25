@@ -304,6 +304,8 @@ describe.sequential("POST /users/switch API Endpoint", () => {
     });
   });
 
+  let switchedAccessToken;
+
   it("should switch tokens and return user if admin and user exists", async () => {
     if (!testUserId) return;
     await $fetch("/users/switch", {
@@ -325,6 +327,20 @@ describe.sequential("POST /users/switch API Endpoint", () => {
         );
         expect(refreshTokenObj).toBeDefined();
         expect(accessTokenObj).toBeDefined();
+        switchedAccessToken = accessTokenObj.value;
+      },
+    });
+  });
+
+  it("gets 200 valid switched user", async () => {
+    await $fetch("/", {
+      baseURL: process.env.API_URL,
+      headers: {
+        Accept: "application/json",
+        Cookie: `accessToken=${switchedAccessToken};`,
+      },
+      onResponse: ({ response }) => {
+        expect(response.status).toBe(200);
       },
     });
   });
