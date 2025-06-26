@@ -69,6 +69,80 @@
         }
       }
     },
+    "/transactions": {
+      "get": {
+        "summary": "Get user transactions",
+        "parameters": [
+          {
+            "name": "order",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["asc", "desc"],
+              "default": "asc",
+              "description": "Order of transactions, either ascending or descending"
+            }
+          },
+          {
+            "name": "orderBy",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["_id", "from", "to", "symbol", "timestamp", "message", "value"],
+              "default": "timestamp",
+              "description": "Field to order transactions by"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 0,
+              "description": "Number of records to skip for pagination"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 10,
+              "description": "Maximum number of records to return"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TransactionResponse"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Wallet not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/refresh": {
       "get": {
         "summary": "Refresh user tokens",
@@ -457,6 +531,44 @@
             "description": "User metadata where keys are strings and values can be strings or numbers."
           }
         }
+      },
+      "TransactionResponse": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "description": "Unique identifier for the transaction"
+          },
+          "from": {
+            "type": "string",
+            "description": "Sender's identifier"
+          },
+          "to": {
+            "type": "string",
+            "description": "Receiver's identifier"
+          },
+          "symbol": {
+            "type": "string",
+            "description": "Currency symbol of the transaction"
+          },
+          "timestamp": {
+            "type": "integer",
+            "description": "Timestamp of the transaction in seconds since epoch"
+          },
+          "message": {
+            "type": "string",
+            "description": "Optional message associated with the transaction"
+          },
+          "value": {
+            "type": "number",
+            "description": "Amount of the transaction"
+          },
+          "__v": {
+            "type": "number",
+            "description": "Version of the transaction document"
+          }
+        },
+        "required": ["_id", "from", "to", "symbol", "timestamp", "value", "__v"]
       },
       "UpdateMetaRequest": {
         "type": "object",
