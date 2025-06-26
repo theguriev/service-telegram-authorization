@@ -372,9 +372,7 @@
             }
           }
         },
-        "security": [
-          { "cookieAuth": [] }
-        ]
+        "security": [{ "cookieAuth": [] }]
       }
     }
   },

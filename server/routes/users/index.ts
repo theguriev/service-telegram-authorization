@@ -11,17 +11,9 @@ export default defineEventHandler(async (event) => {
   const convertedOffset = Number(offset);
   const convertedLimit = Number(limit);
   const convertedSearch = String(search);
-  const userId = await getUserId(event);
+  const role = await getUserRole(event);
 
-  const user = await ModelUser.findById(new ObjectId(String(userId)));
-
-  if (!user) {
-    throw createError({
-      message: "User not found",
-      statusCode: 404,
-    });
-  }
-  if (user.role !== "admin") {
+  if (role !== "admin") {
     throw createError({
       message: "You are not authorized to perform this action",
       statusCode: 403,
