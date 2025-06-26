@@ -56,11 +56,11 @@ const ctx: Context = {
     PORT: "4000",
     API_URL: "http://localhost:4000",
     VALID_ADMIN_ACCESS_TOKEN: issueAccessToken(
-      { userId: adminId, role: "admin" },
+      { userId: adminId, role: "admin", id: adminId },
       { secret: "gurievcreative" }
     ),
     VALID_REGULAR_ACCESS_TOKEN: issueAccessToken(
-      { userId: regularId },
+      { userId: regularId, role: "user", id: regularId },
       { secret: "gurievcreative" }
     ),
   },

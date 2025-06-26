@@ -7,17 +7,23 @@ const useTokens = ({
   event,
   userId,
   role = "user",
+  id,
 }: {
   event: H3Event<EventHandlerRequest>;
   userId: string;
   role?: string;
+  id?: string;
 }) => {
   const refreshToken = issueRefreshToken();
   const { secret } = useRuntimeConfig();
   const timestamp = Date.now();
   const expiresRefreshToken = new Date(timestamp + MONTH);
   const expiresAccessToken = new Date(timestamp + MINUTES_15);
-  const accessToken = issueAccessToken({ userId, role }, { secret });
+  const initialId = id || userId;
+  const accessToken = issueAccessToken(
+    { userId, role, id: initialId },
+    { secret }
+  );
 
   setCookie(event, "refreshToken", refreshToken, {
     expires: expiresRefreshToken,
@@ -42,7 +48,9 @@ const useTokens = ({
 
   const deleteByUserId = async () => {
     const refreshTokenDocument = new ModelToken();
-    return await refreshTokenDocument.collection.deleteMany({ userId });
+    return await refreshTokenDocument.collection.deleteMany({
+      userId: initialId,
+    });
   };
   return { refreshToken, accessToken, timestamp, save, deleteByUserId };
 };

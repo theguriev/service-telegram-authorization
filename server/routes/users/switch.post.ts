@@ -4,12 +4,12 @@ const requestBodySchema = z.object({
 
 export default eventHandler(async (event) => {
   const { id: userId } = await zodValidateBody(event, requestBodySchema.parse);
-  const adminId = await getUserId(event);
-  if (!adminId) {
+  const initialId = await getId(event);
+  if (!initialId) {
     throw createError({ message: "Unauthorized", status: 401 });
   }
 
-  const admin = await ModelUser.findById(adminId);
+  const admin = await ModelUser.findById(initialId);
   if (!admin || admin.role !== "admin") {
     throw createError({ message: "Forbidden: Not an admin", status: 403 });
   }
@@ -26,6 +26,7 @@ export default eventHandler(async (event) => {
   const { save, deleteByUserId } = useTokens({
     event,
     userId,
+    id: initialId,
     role: "admin",
   });
   await deleteByUserId();
