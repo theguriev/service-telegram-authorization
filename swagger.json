@@ -143,6 +143,33 @@
         }
       }
     },
+    "/balance": {
+      "get": {
+        "summary": "Get user balance",
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BalanceResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Wallet not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/refresh": {
       "get": {
         "summary": "Refresh user tokens",
@@ -567,6 +594,16 @@
           }
         },
         "required": ["_id", "from", "to", "symbol", "timestamp", "value", "__v"]
+      },
+      "BalanceResponse": {
+        "type": "object",
+        "properties": {
+          "balance": {
+            "type": "number",
+            "description": "Current balance of the user"
+          }
+        },
+        "required": ["balance"]
       },
       "UpdateMetaRequest": {
         "type": "object",
