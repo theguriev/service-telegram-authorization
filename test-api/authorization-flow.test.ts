@@ -24,6 +24,11 @@ const accessAndRefreshToBeDefined = (response: FetchResponse<any>) => {
   );
   expect(refreshTokenObj).toBeDefined();
   expect(accessTokenObj).toBeDefined();
+
+  return {
+    refreshToken: refreshTokenObj.value,
+    accessToken: accessTokenObj.value,
+  };
 };
 
 describe.sequential("Authorization", () => {
@@ -249,9 +254,12 @@ describe.sequential("Authorization", () => {
           Accept: "application/json",
           Cookie: `refreshToken=${validRefreshToken}`,
         },
-        onResponse: ({ response }) => {
+        onResponse: async ({ response }) => {
           expect(response.status).toBe(200);
-          accessAndRefreshToBeDefined(response);
+          const { accessToken } = accessAndRefreshToBeDefined(response);
+          const verified = await verify(accessToken, process.env.SECRET);
+          expect(verified.id).toBeDefined();
+          expect(verified.role).toBeDefined();
         },
       });
     });

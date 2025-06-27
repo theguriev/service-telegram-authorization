@@ -42,6 +42,8 @@ const useTokens = ({
       userId,
       token: refreshToken,
       timestamp,
+      id,
+      role,
     });
     return await refreshTokenDocument.save();
   };

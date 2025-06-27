@@ -6,7 +6,9 @@ const requestBodySchema = z.object({
   hash: z.string(),
   canSendAfter: z.number().optional(),
   chat: z.string().optional(),
-  chatType: z.enum(["sender", "private", "group", "supergroup", "channel"]).optional(),
+  chatType: z
+    .enum(["sender", "private", "group", "supergroup", "channel"])
+    .optional(),
   chatInstance: z.string().optional(),
   receiver: z.string().optional(),
   startParam: z.string().optional(),
@@ -14,19 +16,15 @@ const requestBodySchema = z.object({
 
 export default eventHandler(async (event) => {
   const { botToken } = useRuntimeConfig();
-  const validated = await zodValidateBody(
-    event,
-    requestBodySchema.parse
-  );
-  const valid = isValidTelegramHash(
-    validated,
-    botToken,
-    true
-  );
+  const validated = await zodValidateBody(event, requestBodySchema.parse);
+  const valid = isValidTelegramHash(validated, botToken, true);
 
   const { user, receiver, authDate, hash } = validated;
   if (!user && !receiver) {
-    throw createError({ message: "Either 'user' or 'receiver' must be provided.", status: 400 });
+    throw createError({
+      message: "Either 'user' or 'receiver' must be provided.",
+      status: 400,
+    });
   }
   const {
     id,
@@ -95,6 +93,7 @@ export default eventHandler(async (event) => {
     event,
     userId: _id,
     role,
+    id: _id,
   });
   save();
   return await ModelUser.findOne({ _id });

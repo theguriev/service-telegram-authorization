@@ -15,6 +15,8 @@ export default eventHandler(async (event) => {
   const { save, deleteByUserId } = useTokens({
     event,
     userId,
+    role: oldRefreshTokenDocument.role,
+    id: oldRefreshTokenDocument.id,
   });
   await deleteByUserId();
   await save();
