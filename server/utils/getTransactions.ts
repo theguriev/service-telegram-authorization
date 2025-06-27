@@ -1,6 +1,6 @@
 import { Wallet } from "ethers";
 
-const getBalance = async (privateKey: string, options: {
+const getTransactions = async (privateKey: string, options: {
   limit?: number;
   offset?: number;
   order?: 'asc' | 'desc';
@@ -26,4 +26,4 @@ const getBalance = async (privateKey: string, options: {
     });
 };
 
-export default getBalance;
+export default getTransactions;
