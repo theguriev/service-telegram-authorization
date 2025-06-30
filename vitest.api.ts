@@ -1,6 +1,6 @@
-import { defineConfig } from "vitest/config";
-import Unimport from "unimport/unplugin";
 import { resolve } from "pathe";
+import Unimport from "unimport/unplugin";
+import { defineConfig } from "vitest/config";
 import { imports } from "./constants";
 
 export default defineConfig({
@@ -21,6 +21,11 @@ export default defineConfig({
         },
         {
           name: "default",
+          as: "ModelWallet",
+          from: "./db/model/wallet.ts",
+        },
+        {
+          name: "default",
           as: "schemaToken",
           from: "./db/schema/token.ts",
         },
@@ -28,6 +33,11 @@ export default defineConfig({
           name: "default",
           as: "schemaUser",
           from: "./db/schema/user.ts",
+        },
+        {
+          name: "default",
+          as: "schemaWallet",
+          from: "./db/schema/wallet.ts",
         },
       ],
       dirs: ["./server/utils"],

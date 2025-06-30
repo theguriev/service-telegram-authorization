@@ -71,6 +71,7 @@
     },
     "/transactions": {
       "get": {
+        "tags": ["subscriptions"],
         "summary": "Get user transactions",
         "parameters": [
           {
@@ -145,6 +146,7 @@
     },
     "/balance": {
       "get": {
+        "tags": ["subscriptions"],
         "summary": "Get user balance",
         "responses": {
           "200": {
@@ -159,6 +161,74 @@
           },
           "404": {
             "description": "Wallet not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/subscription/continue": {
+      "post": {
+        "tags": ["subscriptions"],
+        "summary": "Continue user subscription",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ContinueSubscriptionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContinueSubscriptionResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Receiver already contains balance",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Unauthorized to continue subscription",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Receiver not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "User not exists",
             "content": {
               "application/json": {
                 "schema": {
@@ -479,6 +549,28 @@
   },
   "components": {
     "schemas": {
+      "ContinueSubscriptionRequest": {
+        "type": "object",
+        "properties": {
+          "receiver": {
+            "type": "string",
+            "description": "ID of the user to continue subscription for",
+            "example": "60c72b2f9b1e8b001c8e4d3a"
+          }
+        },
+        "required": ["receiver"]
+      },
+      "ContinueSubscriptionResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "Indicates if the subscription continuation was successful",
+            "example": true
+          }
+        },
+        "required": ["success"]
+      },
       "LoginRequest": {
         "type": "object",
         "properties": {
