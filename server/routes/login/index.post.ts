@@ -68,6 +68,7 @@ export default eventHandler(async (event) => {
     event,
     userId: _id,
     role,
+    id: _id,
   });
   save();
   return await ModelUser.findOne({ _id });

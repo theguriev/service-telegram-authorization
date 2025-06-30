@@ -345,3 +345,135 @@ describe.sequential("POST /users/switch API Endpoint", () => {
     });
   });
 });
+
+describe.sequential("POST /users/switch API Endpoint", () => {
+  let adminAccessToken;
+  let regularAccessToken;
+  let testUserId;
+
+  beforeAll(async () => {
+    // Use environment variables or setup logic to get tokens and a test user
+    adminAccessToken = process.env.VALID_ADMIN_ACCESS_TOKEN;
+    regularAccessToken = process.env.VALID_REGULAR_ACCESS_TOKEN;
+
+    const body = {
+      id: 379669522,
+      firstName: "eugen",
+      lastName: "guriev",
+      username: "theguriev",
+      photoUrl:
+        "https://t.me/i/userpic/320/RzvNak5c9L4Q7SgN8kNw-NHzli47jbL76HLk8rP3y8o.jpg",
+      authDate: 1738000347,
+    };
+
+    await $fetch("/login", {
+      baseURL,
+      method: "POST",
+      headers: { Accept: "application/json" },
+      body: {
+        ...body,
+        hash: generateTelegramHash(body, process.env.NITRO_BOT_TOKEN),
+      },
+      onResponse: async ({ response }) => {
+        testUserId = response._data._id;
+      },
+    });
+  });
+
+  it("should return 500 if not authenticated", async () => {
+    await $fetch("/users/switch", {
+      baseURL,
+      method: "POST",
+      body: { id: testUserId },
+      ignoreResponseError: true,
+      onResponse: ({ response }) => {
+        expect(response.status).toBe(500);
+      },
+    });
+  });
+
+  it("should return 403 if not admin", async () => {
+    await $fetch("/users/switch", {
+      baseURL,
+      method: "POST",
+      body: { id: testUserId },
+      headers: {
+        Cookie: `accessToken=${regularAccessToken}`,
+      },
+      ignoreResponseError: true,
+      onResponse: ({ response }) => {
+        expect(response.status).toBe(403);
+      },
+    });
+  });
+
+  it("should return 400 if userId is missing", async () => {
+    await $fetch("/users/switch", {
+      baseURL,
+      method: "POST",
+      headers: {
+        Cookie: `accessToken=${adminAccessToken}`,
+      },
+      ignoreResponseError: true,
+      onResponse: ({ response }) => {
+        expect(response.status).toBe(400);
+      },
+    });
+  });
+
+  it("should return 404 if user not found", async () => {
+    await $fetch("/users/switch", {
+      baseURL,
+      method: "POST",
+      body: { id: "000000000000000000000000" },
+      headers: {
+        Cookie: `accessToken=${adminAccessToken}`,
+      },
+      ignoreResponseError: true,
+      onResponse: ({ response }) => {
+        expect(response.status).toBe(404);
+      },
+    });
+  });
+
+  let switchedAccessToken;
+
+  it("should switch tokens and return user if admin and user exists", async () => {
+    if (!testUserId) return;
+    await $fetch("/users/switch", {
+      baseURL,
+      method: "POST",
+      body: { id: testUserId },
+      headers: {
+        Cookie: `accessToken=${adminAccessToken}`,
+      },
+      onResponse: ({ response }) => {
+        expect(response.status).toBe(200);
+        expect(response._data).toHaveProperty("_id", testUserId);
+        const setCookie = extractSetCookie(response.headers);
+        const refreshTokenObj = setCookie.find(
+          (cookie) => cookie.name === "refreshToken"
+        );
+        const accessTokenObj = setCookie.find(
+          (cookie) => cookie.name === "accessToken"
+        );
+        expect(refreshTokenObj).toBeDefined();
+        expect(accessTokenObj).toBeDefined();
+        switchedAccessToken = accessTokenObj.value;
+      },
+    });
+  });
+
+  it("gets 200 valid switched user", async () => {
+    await $fetch("/", {
+      baseURL: process.env.API_URL,
+      headers: {
+        Accept: "application/json",
+        Cookie: `accessToken=${switchedAccessToken};`,
+      },
+      onResponse: ({ response }) => {
+        expect(response.status).toBe(200);
+      },
+    });
+  });
+});

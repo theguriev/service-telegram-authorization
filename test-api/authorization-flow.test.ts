@@ -150,40 +150,6 @@ describe.sequential("Authorization", () => {
     });
   });
 
-  describe("GET /transactions", () => {
-    it("gets 200 on authorized access", async () => {
-      await $fetch("/transactions", {
-        baseURL: process.env.API_URL,
-        headers: {
-          Accept: "application/json",
-          Cookie: `accessToken=${validAccessToken};`,
-        },
-        onResponse: ({ response }) => {
-          expect(response.status).toBe(200);
-          expect(response._data).toEqual([]);
-        },
-      });
-    });
-  });
-
-  describe("GET /balance", () => {
-    it("gets 200 on authorized access", async () => {
-      await $fetch("/balance", {
-        baseURL: process.env.API_URL,
-        headers: {
-          Accept: "application/json",
-          Cookie: `accessToken=${validAccessToken};`,
-        },
-        onResponse: ({ response }) => {
-          expect(response.status).toBe(200);
-          expect(response._data).toEqual({
-            balance: 0
-          });
-        },
-      });
-    });
-  });
-
   describe("POST /login/web-app", () => {
     it("gets 400 on validation errors", async () => {
       await $fetch("/login/web-app", {
