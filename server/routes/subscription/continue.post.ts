@@ -1,4 +1,3 @@
-
 const requestBodySchema = z.object({
   receiver: z.string(),
 });
@@ -36,7 +35,8 @@ export default eventHandler(async (event) => {
       throw createError({ message: "User has a balance, cannot continue subscription", status: 400 });
     }
 
-    await sendTransaction(walletPrivateKey, wallet.privateKey, 61, "Continue subscription");
+    const subscriptionDuration = 61; // 61 days
+    await sendTransaction(walletPrivateKey, wallet.privateKey, subscriptionDuration, "Continue subscription");
   }
 
   return {
