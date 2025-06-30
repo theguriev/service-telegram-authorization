@@ -21,7 +21,7 @@ export default eventHandler(async (event) => {
     userId: new Types.ObjectId(receiver),
   });
   if (!wallet) {
-    throw createError({ message: "Wallet not found for the specified user", statusCode: 404 });
+    throw createError({ message: "Wallet not found for the specified user", status: 404 });
   }
 
   const { walletPrivateKey } = useRuntimeConfig();
