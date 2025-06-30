@@ -1,4 +1,3 @@
-import { Types } from "mongoose";
 
 const requestBodySchema = z.object({
   receiver: z.string(),
@@ -12,13 +11,19 @@ export default eventHandler(async (event) => {
   if (user === null) {
     throw createError({ message: "User not exists", status: 409 });
   }
-  if (user.role !== "admin") {
+
+
+  const { receiver: receiverId } = await zodValidateBody(event, requestBodySchema.parse);
+  const receiver = await ModelUser.findById(receiverId);
+  if (!receiver) {
+    throw createError({ message: "Receiver not found", status: 404 });
+  }
+  if (receiver.meta?.get("managerId")?.toString() !== user._id.toString() && user.role !== "admin") {
     throw createError({ message: "You are not authorized to access this resource", status: 403 });
   }
 
-  const { receiver } = await zodValidateBody(event, requestBodySchema.parse);
   const wallet = await ModelWallet.findOne({
-    userId: new Types.ObjectId(receiver),
+    userId: receiver._id,
   });
   if (!wallet) {
     throw createError({ message: "Wallet not found for the specified user", status: 404 });
