@@ -5,7 +5,7 @@ export default eventHandler(async (event) => {
 
   const walletModel = await ModelWallet.findOne({ userId: new Types.ObjectId(String(_id)) });
   if (!walletModel) {
-    throw createError({ message: "Wallet not found", statusCode: 404 });
+    throw createError({ message: "Wallet not found", status: 404 });
   }
   const balance = process.env.VITEST === "true" ? 0 : await getBalance(walletModel.privateKey);
 
