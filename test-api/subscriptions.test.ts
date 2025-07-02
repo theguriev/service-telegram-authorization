@@ -53,6 +53,51 @@ describe.sequential("Subscriptions", () => {
     });
   });
 
+  describe("GET /transactions/[uid]", () => {
+    it("gets 403 on unauthorized access", async () => {
+      await $fetch(`/transactions/${regularId}`, {
+        baseURL: process.env.API_URL,
+        method: "GET",
+        ignoreResponseError: true,
+        headers: {
+          Accept: "application/json",
+          Cookie: `accessToken=${regularAccessToken};`,
+        },
+        onResponse: ({ response }) => {
+          expect(response.status).toBe(403);
+        },
+      });
+    });
+    it("gets 404 on invalid owner", async () => {
+      await $fetch("/transactions/6808bcfb77143eceb802c5a9", {
+        baseURL: process.env.API_URL,
+        method: "GET",
+        ignoreResponseError: true,
+        headers: {
+          Accept: "application/json",
+          Cookie: `accessToken=${adminAccessToken};`,
+        },
+        onResponse: ({ response }) => {
+          expect(response.status).toBe(404);
+        },
+      });
+    });
+    it("gets 200 on authorized access", async () => {
+      await $fetch(`/transactions/${regularId}`, {
+        baseURL: process.env.API_URL,
+        method: "GET",
+        headers: {
+          Accept: "application/json",
+          Cookie: `accessToken=${adminAccessToken};`,
+        },
+        onResponse: ({ response }) => {
+          expect(response.status).toBe(200);
+          expect(response._data).toEqual([]);
+        },
+      });
+    });
+  });
+
   describe("GET /balance", () => {
     it("gets 200 on authorized access", async () => {
       await $fetch("/balance", {
@@ -65,6 +110,53 @@ describe.sequential("Subscriptions", () => {
           expect(response.status).toBe(200);
           expect(response._data).toEqual({
             balance: 0
+          });
+        },
+      });
+    });
+  });
+
+  describe("GET /balance/[uid]", () => {
+    it("gets 403 on unauthorized access", async () => {
+      await $fetch(`/balance/${regularId}`, {
+        baseURL: process.env.API_URL,
+        method: "GET",
+        ignoreResponseError: true,
+        headers: {
+          Accept: "application/json",
+          Cookie: `accessToken=${regularAccessToken};`,
+        },
+        onResponse: ({ response }) => {
+          expect(response.status).toBe(403);
+        },
+      });
+    });
+    it("gets 404 on invalid owner", async () => {
+      await $fetch("/balance/6808bcfb77143eceb802c5a9", {
+        baseURL: process.env.API_URL,
+        method: "GET",
+        ignoreResponseError: true,
+        headers: {
+          Accept: "application/json",
+          Cookie: `accessToken=${adminAccessToken};`,
+        },
+        onResponse: ({ response }) => {
+          expect(response.status).toBe(404);
+        },
+      });
+    });
+    it("gets 200 on authorized access", async () => {
+      await $fetch(`/balance/${regularId}`, {
+        baseURL: process.env.API_URL,
+        method: "GET",
+        headers: {
+          Accept: "application/json",
+          Cookie: `accessToken=${adminAccessToken};`,
+        },
+        onResponse: ({ response }) => {
+          expect(response.status).toBe(200);
+          expect(response._data).toEqual({
+            balance: 0,
           });
         },
       });

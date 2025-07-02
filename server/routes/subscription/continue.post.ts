@@ -11,7 +11,6 @@ export default eventHandler(async (event) => {
     throw createError({ message: "User not exists", status: 409 });
   }
 
-
   const { receiver: receiverId } = await zodValidateBody(event, requestBodySchema.parse);
   const receiver = await ModelUser.findById(receiverId);
   if (!receiver) {
