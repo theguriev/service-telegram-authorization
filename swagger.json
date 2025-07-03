@@ -797,6 +797,11 @@
           "hash": {
             "type": "string"
           },
+          "role": {
+            "type": "string",
+            "enum": ["user", "admin"],
+            "description": "User role in the system"
+          },
           "createdAt": {
             "type": "string",
             "format": "date-time"
