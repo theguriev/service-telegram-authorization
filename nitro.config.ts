@@ -16,8 +16,8 @@ export default defineNitroConfig({
     tasks: true,
   },
   scheduledTasks: {
-    '0 0 * * *': ['wallet:daily'],
-    '0 10 * * *': ['wallet:manager-daily'],
+    "0 0 * * *": ["wallet:daily", "wallet:daily-spend"],
+    "0 10 * * *": ["wallet:manager-daily"],
   },
   imports: {
     imports: [
