@@ -42,7 +42,10 @@ export default defineTask({
           }
         }
       } catch (error) {
-        console.error(`Error processing wallet for user ${userId}:`, error);
+        console.error(
+          `Error processing notification for user ${userId}:`,
+          error
+        );
       }
     }
     return { result: "Success" };
