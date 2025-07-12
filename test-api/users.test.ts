@@ -90,7 +90,7 @@ describe.sequential("GET /users API Endpoint", () => {
     });
 
     it("should filter users by search term (firstName or lastName, case-insensitive)", async () => {
-      const searchTerm = "Adm";
+      const searchTerm = "Test";
       await $fetch(`/users?search=${encodeURIComponent(searchTerm)}`, {
         baseURL,
         method: "GET",

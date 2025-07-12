@@ -12,6 +12,7 @@ export default defineEventHandler(async (event) => {
   const convertedLimit = Number(limit);
   const convertedSearch = String(search);
   const role = await getUserRole(event);
+  const initialId = await getId(event);
 
   if (role !== "admin") {
     throw createError({
@@ -19,6 +20,19 @@ export default defineEventHandler(async (event) => {
       statusCode: 403,
     });
   }
+
+  const manager = await ModelUser.findOne({
+    _id: new ObjectId(initialId),
+  });
+
+  if (!manager) {
+    throw createError({
+      message: "Manager not found",
+      statusCode: 404,
+    });
+  }
+
+  const managerId = manager.id;
 
   await zodValidateData(
     {
@@ -28,14 +42,23 @@ export default defineEventHandler(async (event) => {
     querySchema.parse
   );
 
+  const baseQuery = { "meta.managerId": managerId };
+
   if (!convertedSearch) {
-    return ModelUser.find().skip(convertedOffset).limit(convertedLimit);
+    return ModelUser.find(baseQuery)
+      .skip(convertedOffset)
+      .limit(convertedLimit);
   }
 
   return ModelUser.find({
-    $or: [
-      { firstName: { $regex: new RegExp(convertedSearch, "i") } },
-      { lastName: { $regex: new RegExp(convertedSearch, "i") } },
+    $and: [
+      baseQuery,
+      {
+        $or: [
+          { firstName: { $regex: new RegExp(convertedSearch, "i") } },
+          { lastName: { $regex: new RegExp(convertedSearch, "i") } },
+        ],
+      },
     ],
   })
     .skip(convertedOffset)

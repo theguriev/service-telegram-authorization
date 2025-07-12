@@ -24,6 +24,9 @@ export const regularUserSeedData = {
   authDate: Math.floor(Date.now() / 1000) - 7200,
   hash: "seed-regular-hash", // Placeholder
   role: "user",
+  meta: {
+    managerId: adminUserSeedData.id, // Link to admin user
+  },
 };
 
 export const adminWalletSeedData = {
