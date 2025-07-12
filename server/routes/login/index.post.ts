@@ -42,7 +42,14 @@ export default eventHandler(async (event) => {
     });
     save();
 
-    await createWallet(userSaved._id);
+    const walletRecord = await createWallet(userSaved._id);
+
+    if (walletRecord === null) {
+      throw createError({
+        message: "Failed to create wallet for the user.",
+        status: 500,
+      });
+    }
 
     return userDocument;
   }
