@@ -1,4 +1,5 @@
 import { Wallet } from "ethers";
+import { bllsBase } from "~~/constants";
 
 const getTransactions = async (privateKey: string, options: {
   limit?: number;
@@ -15,7 +16,8 @@ const getTransactions = async (privateKey: string, options: {
       timestamp: number;
       message?: string;
       value: number;
-    }[]>(`http://api.blls.me:3000/billing/transactions`, {
+    }[]>(`/billing/transactions`, {
+      baseURL: bllsBase,
       query: {
         address: wallet.address,
         symbol: 'nka',
