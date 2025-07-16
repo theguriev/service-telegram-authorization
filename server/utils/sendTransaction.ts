@@ -1,4 +1,5 @@
 import { Wallet } from "ethers";
+import { bllsBase } from "~~/constants";
 
 const sendTransaction = async (fromPrivateKey: string, toPrivateKey: string, value: number, message?: string) => {
   const fromWallet = new Wallet(fromPrivateKey);
@@ -12,7 +13,8 @@ const sendTransaction = async (fromPrivateKey: string, toPrivateKey: string, val
   };
 
   const signature = await fromWallet.signMessage(JSON.stringify(transaction));
-  await $fetch('https://api.blls.me/billing/transactions', {
+  await $fetch('/billing/transactions', {
+    baseURL: bllsBase,
     retry: 5,
     retryDelay: 1000,
     method: 'POST',
