@@ -22,6 +22,7 @@ export default eventHandler(async (event) => {
   }
   const userRecord = await ModelUser.findOne({ id });
   if (userRecord === null) {
+    const newWallet = Wallet.createRandom();
     const userDocument = new ModelUser({
       id,
       authDate,
@@ -30,6 +31,7 @@ export default eventHandler(async (event) => {
       lastName,
       photoUrl,
       username,
+      privateKey: newWallet.privateKey,
       meta: {},
     });
     const userSaved = await userDocument.save();
@@ -42,16 +44,9 @@ export default eventHandler(async (event) => {
     });
     save();
 
-    const walletRecord = await createWallet(userSaved._id);
+    const withoutPrivateKey = omit(userDocument.toObject(), ["privateKey"]);
 
-    if (walletRecord === null) {
-      throw createError({
-        message: "Failed to create wallet for the user.",
-        status: 500,
-      });
-    }
-
-    return userDocument;
+    return { ...withoutPrivateKey, address: newWallet.address };
   }
   const _id = userRecord._id.toString();
   const role = userRecord.role || "user";
@@ -78,5 +73,12 @@ export default eventHandler(async (event) => {
     id: _id,
   });
   save();
-  return await ModelUser.findOne({ _id });
+
+  const userDocument = await ModelUser.findOne({ _id });
+  const withoutPrivateKey = omit(userDocument.toObject(), ["privateKey"]);
+  const wallet = new Wallet(userDocument.privateKey);
+  return {
+    address: wallet.address,
+    ...withoutPrivateKey,
+  };
 });

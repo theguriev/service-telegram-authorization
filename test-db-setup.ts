@@ -2,6 +2,9 @@ import { Wallet } from "ethers";
 import { ObjectId } from "mongodb";
 import { adminId, regularId } from "./constants";
 
+const adminWallet = Wallet.createRandom();
+const regularWallet = Wallet.createRandom();
+
 export const adminUserSeedData = {
   _id: new ObjectId(adminId), // Specific ObjectId for admin
   id: 379669528,
@@ -12,6 +15,7 @@ export const adminUserSeedData = {
   authDate: Math.floor(Date.now() / 1000) - 7200,
   hash: "seed-admin-hash",
   role: "admin",
+  privateKey: adminWallet.privateKey,
 };
 
 export const regularUserSeedData = {
@@ -24,26 +28,16 @@ export const regularUserSeedData = {
   authDate: Math.floor(Date.now() / 1000) - 7200,
   hash: "seed-regular-hash", // Placeholder
   role: "user",
+  privateKey: regularWallet.privateKey,
   meta: {
     managerId: adminUserSeedData.id, // Link to admin user
   },
-};
-
-export const adminWalletSeedData = {
-  userId: new ObjectId(adminId),
-  privateKey: Wallet.createRandom().privateKey,
-};
-
-export const regularWalletSeedData = {
-  userId: new ObjectId(regularId),
-  privateKey: Wallet.createRandom().privateKey,
 };
 
 export async function clearTestData() {
   try {
     await ModelUser.deleteMany({});
     await ModelToken.deleteMany({});
-    await ModelWallet.deleteMany({});
     console.log(
       "\x1b[32m%s\x1b[0m",
       "✓",
@@ -58,7 +52,6 @@ export async function clearTestData() {
 export async function seedTestData() {
   try {
     await ModelUser.create([adminUserSeedData, regularUserSeedData]);
-    await ModelWallet.create([adminWalletSeedData, regularWalletSeedData]);
     console.log("\x1b[32m%s\x1b[0m", "✓", "Test database seeded successfully.");
   } catch (error) {
     console.error("Error seeding test database:", error);

@@ -9,15 +9,6 @@ export default defineNitroConfig({
     mongoUri: "mongodb://root:example@localhost:27017/",
     botToken: "",
     secret: "gurievcreative",
-    walletPrivateKey: "",
-    notificationBase: "http://localhost:4000",
-  },
-  experimental: {
-    tasks: true,
-  },
-  scheduledTasks: {
-    "0 21 * * *": ["wallet:daily", "wallet:daily-spend"],
-    "0 7 * * *": ["wallet:manager-daily"],
   },
   imports: {
     imports: [
@@ -26,6 +17,8 @@ export default defineNitroConfig({
       { name: "InferSchemaType", from: "mongoose", type: true },
       { name: "parse", from: "set-cookie-parser" },
       { name: "destr", from: "destr" },
+      { name: "Wallet", from: "ethers" },
+      { name: "omit", from: "es-toolkit/compat" },
     ],
     presets: [
       {

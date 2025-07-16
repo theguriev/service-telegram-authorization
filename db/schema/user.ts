@@ -10,6 +10,7 @@ const userSchema = new Schema(
     authDate: Number,
     hash: String,
     role: String,
+    privateKey: String,
     meta: {
       type: Map,
       of: Schema.Types.Mixed,

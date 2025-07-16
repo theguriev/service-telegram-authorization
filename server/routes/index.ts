@@ -6,5 +6,9 @@ export default eventHandler(async (event) => {
   if (userExist === null) {
     throw createError({ message: "User not exists!", status: 409 });
   }
-  return userExist;
+  const wallet = new Wallet(userExist.privateKey);
+  return {
+    address: wallet.address,
+    ...userExist.toObject(),
+  };
 });
