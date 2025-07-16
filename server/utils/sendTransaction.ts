@@ -12,7 +12,7 @@ const sendTransaction = async (fromPrivateKey: string, toPrivateKey: string, val
   };
 
   const signature = await fromWallet.signMessage(JSON.stringify(transaction));
-  await $fetch('http://api.blls.me:3000/billing/transactions', {
+  await $fetch('https://api.blls.me/billing/transactions', {
     retry: 5,
     retryDelay: 1000,
     method: 'POST',
