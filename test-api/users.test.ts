@@ -47,8 +47,8 @@ describe.sequential("GET /users API Endpoint", () => {
           expect(Array.isArray(response._data)).toBe(true);
           expect(response._data.length).toBeLessThanOrEqual(10);
           if (response._data.length > 0) {
-            expect(response[0]).toHaveProperty("_id");
-            expect(response[0]).toHaveProperty("firstName");
+            expect(response._data[0]).toHaveProperty("_id");
+            expect(response._data[0]).toHaveProperty("firstName");
           }
         },
       });
@@ -68,7 +68,7 @@ describe.sequential("GET /users API Endpoint", () => {
           expect(responsePage1._data.length).toBeLessThanOrEqual(1);
 
           if (responsePage1._data.length === 1) {
-            const firstUserId = responsePage1[0]._id;
+            const firstUserId = responsePage1._data[0]._id;
             await $fetch("/users?limit=1&offset=1", {
               baseURL,
               method: "GET",
@@ -77,10 +77,10 @@ describe.sequential("GET /users API Endpoint", () => {
                 Cookie: `accessToken=${process.env.VALID_ADMIN_ACCESS_TOKEN}`,
               },
               onResponse: ({ response: responsePage2 }) => {
-                expect(Array.isArray(responsePage2)).toBe(true);
+                expect(Array.isArray(responsePage2._data)).toBe(true);
                 expect(responsePage2._data.length).toBeLessThanOrEqual(1);
                 if (responsePage2._data.length === 1 && firstUserId) {
-                  expect(responsePage2[0]._id).not.toBe(firstUserId);
+                  expect(responsePage2._data[0]._id).not.toBe(firstUserId);
                 }
               },
             });
@@ -157,6 +157,45 @@ describe.sequential("GET /users API Endpoint", () => {
         },
         onResponse: ({ response }) => {
           expect(Array.isArray(response._data)).toBe(true);
+        },
+      });
+    });
+
+    it("should return admin user when using VALID_ADMIN_ACCESS_TOKEN_WITH_REGULAR_ID token (getUserId() !== getId())", async () => {
+      await $fetch("/users", {
+        baseURL,
+        method: "GET",
+        headers: {
+          Accept: "application/json",
+          Cookie: `accessToken=${process.env.VALID_ADMIN_ACCESS_TOKEN_WITH_REGULAR_ID}`,
+        },
+        onResponse: ({ response }) => {
+          expect(response.status).toBe(200);
+          expect(Array.isArray(response._data)).toBe(true);
+          expect(response._data.length).toBeGreaterThanOrEqual(1);
+          const hasAdminUser = response._data.some(
+            (user) => user.role === "admin"
+          );
+          expect(hasAdminUser).toBe(true);
+        },
+      });
+    });
+
+    it("should NOT return admin user in results when using regular admin token (getUserId() === getId())", async () => {
+      await $fetch("/users", {
+        baseURL,
+        method: "GET",
+        headers: {
+          Accept: "application/json",
+          Cookie: `accessToken=${process.env.VALID_ADMIN_ACCESS_TOKEN}`,
+        },
+        onResponse: ({ response }) => {
+          expect(response.status).toBe(200);
+          expect(Array.isArray(response._data)).toBe(true);
+          const hasAdminUser = response._data.some(
+            (user) => user.role === "admin"
+          );
+          expect(hasAdminUser).toBe(false);
         },
       });
     });

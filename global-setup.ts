@@ -63,6 +63,10 @@ const ctx: Context = {
       { userId: regularId, role: "user", id: regularId },
       { secret: "gurievcreative" }
     ),
+    VALID_ADMIN_ACCESS_TOKEN_WITH_REGULAR_ID: issueAccessToken(
+      { userId: regularId, role: "admin", id: adminId },
+      { secret: "gurievcreative" }
+    ),
   },
   fetch: (url, opts): Promise<Response> =>
     $fetch(joinURL(ctx.server!.url, url.slice(1)), {
