@@ -7,7 +7,7 @@ const querySchema = z.object({
 });
 
 const getBaseQuery = (managerId: string, userId: string) => {
-  if (userId !== managerId) {
+  if (userId === managerId) {
     return {
       $or: [{ "meta.managerId": managerId }, { _id: new ObjectId(userId) }],
     };
