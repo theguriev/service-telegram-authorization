@@ -6,6 +6,16 @@ const querySchema = z.object({
   search: z.string().optional(),
 });
 
+const getBaseQuery = (managerId: string, userId: string) => {
+  if (userId !== managerId) {
+    return {
+      $or: [{ "meta.managerId": managerId }, { _id: new ObjectId(userId) }],
+    };
+  } else {
+    return { "meta.managerId": managerId };
+  }
+};
+
 export default defineEventHandler(async (event) => {
   const { offset = 0, limit = 10, search } = getQuery(event);
   const convertedOffset = Number(offset);
@@ -13,6 +23,7 @@ export default defineEventHandler(async (event) => {
   const convertedSearch = String(search);
   const role = await getUserRole(event);
   const initialId = await getId(event);
+  const userId = await getUserId(event);
 
   if (role !== "admin") {
     throw createError({
@@ -42,7 +53,7 @@ export default defineEventHandler(async (event) => {
     querySchema.parse
   );
 
-  const baseQuery = { "meta.managerId": managerId };
+  const baseQuery = getBaseQuery(managerId, userId);
 
   if (!convertedSearch) {
     return ModelUser.find(baseQuery)
