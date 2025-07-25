@@ -71,18 +71,22 @@ export default defineTask({
         }
       });
       const usersWithBalances = await Promise.all(usersWithBalancesAsync);
-      const message = md`Користувачі, у яких закінчується підписка:`
-        + "\n"
-        + usersWithBalances
-            .filter((user) => user && user.balance <= 7)
-            .map(({ user, balance }) => {
-              const name = `${user.firstName} ${user.lastName}`.trim();
-              return md`• [${name}](tg://user?id=${user.id}) \- залишилось днів: ${balance}`;
-            })
-            .join("\n");
+      const message = md`Користувачі, у яких закінчується підписка:`;
+
+      const userLinks = usersWithBalances
+        .filter((user) => user && user.balance <= 7)
+        .map(({ user, balance }) => {
+          const name = `${user.firstName} ${user.lastName}`.trim();
+          return {
+            text: `${name} (залишилось днів: ${balance})`,
+            url: `tg://user?id=${user.id}`,
+          };
+        });
+
+      if (userLinks.length === 0) continue;
 
       try {
-        await sendNotification(notificationBase, message, managerId);
+        await sendNotification(notificationBase, message, managerId, userLinks);
       } catch (error) {
         console.error(`Error sending notification to manager ${managerId}:`, error);
       }

@@ -1,5 +1,5 @@
 
-const sendNotification = async (base: string, content: string, receiver: number) => {
+const sendNotification = async (base: string, content: string, receiverId: number, inlineKeyboard?: { text: string, url: string }[]) => {
   await $fetch("/private/message", {
     retry: 5,
     retryDelay: 1000,
@@ -8,7 +8,7 @@ const sendNotification = async (base: string, content: string, receiver: number)
     headers: {
       Accept: "application/json",
     },
-    body: { content, receiver }
+    body: { content, receiverId, inlineKeyboard }
   });
 };
 
