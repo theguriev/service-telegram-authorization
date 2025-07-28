@@ -1,8 +1,12 @@
+import plural from "plural-ru";
+import { md } from "telegram-escape";
+
 const requestBodySchema = z.object({
   receiver: z.string(),
 });
 
 export default eventHandler(async (event) => {
+  const { notificationBase } = useRuntimeConfig();
   const _id = await getId(event);
   const user = await ModelUser.findOne({
     _id,
@@ -66,12 +70,21 @@ export default eventHandler(async (event) => {
       });
     }
 
-    const subscriptionDuration = 61; // 61 days
+    const transactions = await getTransactions(wallet.privateKey);
+
+    const subscriptionDuration = transactions.length ? 60 : 62;
     await sendTransaction(
       managerWallet.privateKey,
       wallet.privateKey,
       subscriptionDuration,
       "Continue subscription"
+    );
+
+    const days = plural(subscriptionDuration, "%d день", "%d дні", "%d днів");
+    await sendNotification(
+      notificationBase,
+      md`*Вам була надана підписка на ${days}*`,
+      receiver.id
     );
   }
 
