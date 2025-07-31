@@ -1,3 +1,5 @@
+import { omit } from "es-toolkit";
+import { Wallet } from "ethers";
 import { ObjectId } from "mongodb";
 
 const querySchema = z.object({
@@ -40,7 +42,7 @@ export default defineEventHandler(async (event) => {
   }
 
   const manager = await ModelUser.findOne({
-    _id: new ObjectId(initialId),
+    _id: new ObjectId(initialId as string),
   });
 
   if (!manager) {
@@ -60,23 +62,52 @@ export default defineEventHandler(async (event) => {
 
   const baseQuery = getBaseQuery(manager.id, String(manager._id), userId);
 
-  if (!convertedSearch) {
-    return ModelUser.find(baseQuery)
-      .skip(convertedOffset)
-      .limit(convertedLimit);
-  }
+  const match = convertedSearch
+    ? [
+        baseQuery,
+        {
+          $or: [
+            { firstName: { $regex: new RegExp(convertedSearch, "i") } },
+            { lastName: { $regex: new RegExp(convertedSearch, "i") } },
+          ],
+        },
+      ]
+    : [baseQuery];
 
-  return ModelUser.find({
-    $and: [
-      baseQuery,
-      {
-        $or: [
-          { firstName: { $regex: new RegExp(convertedSearch, "i") } },
-          { lastName: { $regex: new RegExp(convertedSearch, "i") } },
-        ],
+  const users = await ModelUser.aggregate([
+    {
+      $match: {
+        $and: match,
       },
-    ],
-  })
-    .skip(convertedOffset)
-    .limit(convertedLimit);
+    },
+    {
+      $lookup: {
+        from: 'wallets',
+        localField: '_id',
+        foreignField: 'userId',
+        as: 'wallet'
+      },
+    },
+    {
+      $unwind: {
+        path: '$wallet',
+        preserveNullAndEmptyArrays: true
+      },
+    },
+    {
+      $skip: convertedOffset
+    },
+    {
+      $limit: convertedLimit
+    }
+  ]);
+
+  const updatedUsers = users.map(user => ({
+    ...(omit(user, ["wallet"])),
+    publicKey: user.wallet?.privateKey
+      ? new Wallet(user.wallet.privateKey).address
+      : undefined,
+  }));
+
+  return updatedUsers;
 });

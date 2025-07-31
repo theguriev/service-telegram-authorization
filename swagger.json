@@ -802,6 +802,11 @@
             "enum": ["user", "admin"],
             "description": "User role in the system"
           },
+          "publicKey": {
+            "type": "string",
+            "description": "Public key of the user, used for transactions",
+            "example": "0x1234567890abcdef1234567890abcdef12345678"
+          },
           "createdAt": {
             "type": "string",
             "format": "date-time"
