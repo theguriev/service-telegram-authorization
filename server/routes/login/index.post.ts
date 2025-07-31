@@ -1,3 +1,5 @@
+import { Wallet } from "ethers";
+
 const requestBodySchema = z.object({
   id: z.number(),
   firstName: z.string(),
@@ -51,7 +53,11 @@ export default eventHandler(async (event) => {
       });
     }
 
-    return userDocument;
+    const walletAddress = new Wallet(walletRecord.privateKey).address;
+    return {
+      ...userSaved.toObject({ flattenMaps: true }),
+      publicKey: walletAddress,
+    };
   }
   const _id = userRecord._id.toString();
   const role = userRecord.role || "user";
@@ -78,5 +84,13 @@ export default eventHandler(async (event) => {
     id: _id,
   });
   save();
-  return await ModelUser.findOne({ _id });
+  const modelRecord = await ModelUser.findOne({ _id });
+  const walletRecord = await ModelWallet.findOne({ userId: modelRecord._id });
+  const walletAddress = walletRecord
+    ? new Wallet(walletRecord.privateKey).address
+    : undefined;
+  return {
+    ...modelRecord.toObject({ flattenMaps: true }),
+    publicKey: walletAddress,
+  };
 });

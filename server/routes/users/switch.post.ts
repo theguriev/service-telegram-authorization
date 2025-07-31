@@ -1,3 +1,5 @@
+import { Wallet } from "ethers";
+
 const requestBodySchema = z.object({
   id: z.string(),
 });
@@ -23,6 +25,11 @@ export default eventHandler(async (event) => {
     throw createError({ message: "User not found", status: 404 });
   }
 
+  const wallet = await ModelWallet.findOne({ userId: user._id });
+  const walletAddress = wallet
+    ? new Wallet(wallet.privateKey).address
+    : undefined;
+
   const { save, deleteByUserId } = useTokens({
     event,
     userId,
@@ -32,5 +39,8 @@ export default eventHandler(async (event) => {
   await deleteByUserId();
   await save();
 
-  return user;
+  return {
+    ...user.toObject({ flattenMaps: true }),
+    publicKey: walletAddress,
+  };
 });

@@ -1,3 +1,5 @@
+import { Wallet } from "ethers";
+
 export default eventHandler(async (event) => {
   const oldRefreshToken = getCookie(event, "refreshToken");
   const oldRefreshTokenDocument = await ModelToken.findOne({
@@ -21,5 +23,16 @@ export default eventHandler(async (event) => {
   await deleteByUserId();
   await save();
 
-  return user.toJSON();
+  const wallet = await ModelWallet.findOne({
+    userId: user._id,
+  });
+
+  const walletAddress = wallet
+    ? new Wallet(wallet.privateKey).address
+    : undefined;
+
+  return {
+    ...user.toObject({ flattenMaps: true }),
+    publicKey: walletAddress,
+  };
 });

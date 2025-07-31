@@ -1,3 +1,5 @@
+import { Wallet } from "ethers";
+
 export default eventHandler(async (event) => {
   const _id = await getUserId(event);
   const userExist = await ModelUser.findOne({
@@ -6,5 +8,16 @@ export default eventHandler(async (event) => {
   if (userExist === null) {
     throw createError({ message: "User not exists!", status: 409 });
   }
-  return userExist;
+
+  const wallet = await ModelWallet.findOne({
+    userId: userExist._id,
+  });
+
+  const walletAddress = wallet
+    ? new Wallet(wallet.privateKey).address
+    : undefined;
+  return {
+    ...userExist.toObject({ flattenMaps: true }),
+    publicKey: walletAddress,
+  }
 });

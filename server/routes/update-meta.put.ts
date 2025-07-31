@@ -1,3 +1,5 @@
+import { Wallet } from "ethers";
+
 const requestBodySchema = z.object({
   meta: z.record(z.any()),
 });
@@ -13,7 +15,18 @@ export default eventHandler(async (event) => {
   }
 
   user.meta = new Map(Object.entries(meta));
-  user.save();
+  await user.save();
 
-  return user;
+  const wallet = await ModelWallet.findOne({
+    userId: user._id,
+  });
+
+  const walletAddress = wallet
+    ? new Wallet(wallet.privateKey).address
+    : undefined;
+
+  return {
+    ...user.toObject({ flattenMaps: true }),
+    publicKey: walletAddress,
+  }
 });
