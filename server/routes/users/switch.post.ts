@@ -26,7 +26,7 @@ export default eventHandler(async (event) => {
   }
 
   const wallet = await ModelWallet.findOne({ userId: user._id });
-  const walletAddress = wallet
+  const walletAddress = wallet?.privateKey
     ? new Wallet(wallet.privateKey).address
     : undefined;
 

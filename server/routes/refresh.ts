@@ -27,7 +27,7 @@ export default eventHandler(async (event) => {
     userId: user._id,
   });
 
-  const walletAddress = wallet
+  const walletAddress = wallet?.privateKey
     ? new Wallet(wallet.privateKey).address
     : undefined;
 

@@ -86,7 +86,7 @@ export default eventHandler(async (event) => {
   save();
   const modelRecord = await ModelUser.findOne({ _id });
   const walletRecord = await ModelWallet.findOne({ userId: modelRecord._id });
-  const walletAddress = walletRecord
+  const walletAddress = walletRecord?.privateKey
     ? new Wallet(walletRecord.privateKey).address
     : undefined;
   return {
