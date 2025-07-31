@@ -242,7 +242,6 @@ describe.sequential("Authorization", () => {
         },
         body: { meta: { firstName: "John", lastName: "Doe" } },
         onResponse: ({ response }) => {
-          console.log(response._data);
           expect(response.status).toBe(200);
           expect(response._data.meta.firstName).toBe("John");
           expect(response._data.meta.lastName).toBe("Doe");
