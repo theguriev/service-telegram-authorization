@@ -97,6 +97,8 @@ describe.sequential("Authorization", () => {
           validAccessToken = accessTokenObj.value;
           expect(response.status).toBe(200);
           expect(response._data).toMatchObject(body);
+          expect(response._data.privateKey).toBeUndefined();
+          expect(response._data.address).toBeDefined();
           accessAndRefreshToBeDefined(response);
         },
       });
@@ -145,6 +147,8 @@ describe.sequential("Authorization", () => {
         },
         onResponse: ({ response }) => {
           expect(response.status).toBe(200);
+          expect(response._data.privateKey).toBeUndefined();
+          expect(response._data.address).toBeDefined();
         },
       });
     });
@@ -193,6 +197,8 @@ describe.sequential("Authorization", () => {
             firstName: userData.firstName,
             username: userData.username,
           });
+          expect(response._data.privateKey).toBeUndefined();
+          expect(response._data.address).toBeDefined();
           accessAndRefreshToBeDefined(response);
         },
       });
@@ -226,6 +232,8 @@ describe.sequential("Authorization", () => {
           const verified = await verify(accessToken, process.env.SECRET);
           expect(verified.id).toBeDefined();
           expect(verified.role).toBeDefined();
+          expect(response._data.privateKey).toBeUndefined();
+          expect(response._data.address).toBeDefined();
         },
       });
     });
@@ -245,6 +253,8 @@ describe.sequential("Authorization", () => {
           expect(response.status).toBe(200);
           expect(response._data.meta.firstName).toBe("John");
           expect(response._data.meta.lastName).toBe("Doe");
+          expect(response._data.privateKey).toBeUndefined();
+          expect(response._data.address).toBeDefined();
         },
       });
     });
