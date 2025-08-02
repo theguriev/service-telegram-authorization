@@ -6,5 +6,5 @@ export default eventHandler(async (event) => {
   if (userExist === null) {
     throw createError({ message: "User not exists!", status: 409 });
   }
-  return userExist;
+  return omit(userExist.toObject(), ["privateKey"]);
 });

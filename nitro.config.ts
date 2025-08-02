@@ -26,6 +26,8 @@ export default defineNitroConfig({
       { name: "InferSchemaType", from: "mongoose", type: true },
       { name: "parse", from: "set-cookie-parser" },
       { name: "destr", from: "destr" },
+      { name: "omit", from: "es-toolkit" },
+      { name: "Wallet", from: "ethers" },
     ],
     presets: [
       {
