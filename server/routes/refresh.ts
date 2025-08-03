@@ -21,5 +21,5 @@ export default eventHandler(async (event) => {
   await deleteByUserId();
   await save();
 
-  return omit(user.toObject(), ["privateKey"]);
+  return user;
 });

@@ -57,7 +57,7 @@ export default eventHandler(async (event) => {
       });
     }
 
-    return omit(userDocument.toObject(), ["privateKey"]);
+    return userDocument;
   }
   const _id = userRecord._id.toString();
   const role = userRecord.role || "user";
@@ -84,5 +84,5 @@ export default eventHandler(async (event) => {
     id: _id,
   });
   save();
-  return omit((await ModelUser.findOne({ _id })).toObject(), ["privateKey"]);
+  return ModelUser.findOne({ _id });
 });

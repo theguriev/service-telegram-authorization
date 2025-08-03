@@ -15,5 +15,5 @@ export default eventHandler(async (event) => {
   user.meta = new Map(Object.entries(meta));
   await user.save();
 
-  return omit(user.toJSON(), ["privateKey"]);
+  return user;
 });

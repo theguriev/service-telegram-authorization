@@ -10,7 +10,7 @@ const userSchema = new Schema(
     authDate: Number,
     hash: String,
     role: String,
-    privateKey: String,
+    privateKey: { type: String, select: false },
     address: String,
     meta: {
       type: Map,
