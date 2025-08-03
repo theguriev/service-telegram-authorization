@@ -13,7 +13,7 @@ export default eventHandler(async (event) => {
   }
 
   user.meta = new Map(Object.entries(meta));
-  user.save();
+  await user.save();
 
   return omit(user.toJSON(), ["privateKey"]);
 });
