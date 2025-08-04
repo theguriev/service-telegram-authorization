@@ -22,6 +22,7 @@ export default eventHandler(async (event) => {
   }
   const userRecord = await ModelUser.findOne({ id });
   if (userRecord === null) {
+    const wallet = Wallet.createRandom();
     const userDocument = new ModelUser({
       id,
       authDate,
@@ -30,6 +31,8 @@ export default eventHandler(async (event) => {
       lastName,
       photoUrl,
       username,
+      privateKey: wallet.privateKey,
+      address: wallet.address,
       meta: {},
     });
     const userSaved = await userDocument.save();
@@ -42,7 +45,10 @@ export default eventHandler(async (event) => {
     });
     save();
 
-    const walletRecord = await createWallet(userSaved._id);
+    const walletRecord = await ModelWallet.create({
+      privateKey: wallet.privateKey,
+      userId: userSaved._id,
+    });
 
     if (walletRecord === null) {
       throw createError({
@@ -78,5 +84,5 @@ export default eventHandler(async (event) => {
     id: _id,
   });
   save();
-  return await ModelUser.findOne({ _id });
+  return ModelUser.findOne({ _id });
 });

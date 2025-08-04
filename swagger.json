@@ -91,7 +91,15 @@
             "required": false,
             "schema": {
               "type": "string",
-              "enum": ["_id", "from", "to", "symbol", "timestamp", "message", "value"],
+              "enum": [
+                "_id",
+                "from",
+                "to",
+                "symbol",
+                "timestamp",
+                "message",
+                "value"
+              ],
               "default": "timestamp",
               "description": "Field to order transactions by"
             }
@@ -176,7 +184,15 @@
             "required": false,
             "schema": {
               "type": "string",
-              "enum": ["_id", "from", "to", "symbol", "timestamp", "message", "value"],
+              "enum": [
+                "_id",
+                "from",
+                "to",
+                "symbol",
+                "timestamp",
+                "message",
+                "value"
+              ],
               "default": "timestamp",
               "description": "Field to order transactions by"
             }
@@ -802,6 +818,10 @@
             "enum": ["user", "admin"],
             "description": "User role in the system"
           },
+          "address": {
+            "type": "string",
+            "description": "User's wallet address"
+          },
           "createdAt": {
             "type": "string",
             "format": "date-time"
@@ -911,6 +931,11 @@
             "description": "JSON string containing user information",
             "example": "{\"id\":379669527,\"first_name\":\"eugen\",\"last_name\":\"\",\"username\":\"theguriev\",\"language_code\":\"en\",\"allows_write_to_pm\":true,\"photo_url\":\"https://t.me/i/userpic/320/example.jpg\"}"
           },
+          "receiver": {
+            "type": "string",
+            "description": "JSON string containing receiver information (fallback when user is not provided)",
+            "example": "{\"id\":379669527,\"first_name\":\"eugen\",\"last_name\":\"\",\"username\":\"theguriev\",\"language_code\":\"en\",\"allows_write_to_pm\":true,\"photo_url\":\"https://t.me/i/userpic/320/example.jpg\"}"
+          },
           "authDate": {
             "type": "integer",
             "example": 1745179538
@@ -935,9 +960,6 @@
             "enum": ["sender", "private", "group", "supergroup", "channel"]
           },
           "chatInstance": {
-            "type": "string"
-          },
-          "receiver": {
             "type": "string"
           },
           "startParam": {
