@@ -1,3 +1,5 @@
+import { addHours } from "date-fns";
+
 export const imports = [
   { name: "describe", from: "vitest" },
   { name: "it", from: "vitest" },
@@ -12,3 +14,5 @@ export const adminId = "6808bcfb77143eceb802c5a7";
 export const regularId = "6808bcfb77143eceb802c5a8";
 
 export const bllsBase = "https://api.blls.me";
+
+export const dateDifference = addHours(0, 3);

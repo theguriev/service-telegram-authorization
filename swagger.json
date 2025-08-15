@@ -585,6 +585,39 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "report",
+            "in": "query",
+            "description": "Filter users by report",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["all", "with", "without"],
+              "default": "all"
+            }
+          },
+          {
+            "name": "measurement",
+            "in": "query",
+            "description": "Filter users by measurement",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["all", "with", "without"],
+              "default": "all"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Filter users by balance status",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["all", "new", "with balance", "without balance"],
+              "default": "all"
+            }
           }
         ],
         "responses": {
