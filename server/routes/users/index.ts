@@ -1,4 +1,5 @@
 import { startOfDay, subDays } from "date-fns";
+import { toZonedTime } from 'date-fns-tz';
 import { ObjectId } from "mongodb";
 import { PipelineStage } from "mongoose";
 import { z } from "zod";
@@ -24,7 +25,9 @@ type QueryFunc = (
 
 const getStartDate = (date: Date) => {
   const startDate = startOfDay(date);
-  return new Date(startDate.getTime() + dateDifference.valueOf());
+  const zonedDate = toZonedTime(date, 'Europe/Kyiv');
+  const difference = date.getTime() - zonedDate.getTime();
+  return new Date(startDate.getTime() + dateDifference.valueOf() + difference);
 };
 
 const queries: Record<string, QueryFunc> = {
