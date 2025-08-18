@@ -12,10 +12,15 @@ export default eventHandler(async (event) => {
     throw createError({ message: "User not found!", status: 404 });
   }
 
+  const globalUser = await ModelUser.findOne({ _id: oldRefreshTokenDocument.id });
+  if (globalUser === null) {
+    throw createError({ message: "Global user not found!", status: 404 });
+  }
+
   const { save, deleteByUserId } = useTokens({
     event,
     userId,
-    role: oldRefreshTokenDocument.role,
+    role: globalUser.role || "user",
     id: oldRefreshTokenDocument.id,
   });
   await deleteByUserId();
