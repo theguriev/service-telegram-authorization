@@ -759,6 +759,84 @@
         },
         "security": [{ "cookieAuth": [] }]
       }
+    },
+    "/users/by-addresses": {
+      "post": {
+        "tags": ["users"],
+        "summary": "Get users by wallet addresses",
+        "description": "Retrieves users based on their wallet addresses. Requires admin privileges. Returns users that match any of the provided addresses.",
+        "operationId": "getUsersByAddresses",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetUsersByAddressesRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "List of users matching the provided addresses",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserResponse"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Invalid request body (e.g., empty addresses array, invalid format)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Missing or invalid authentication token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - User does not have admin privileges",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error - Database query failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ]
+      }
     }
   },
   "components": {
@@ -932,6 +1010,24 @@
           }
         },
         "required": ["meta"]
+      },
+      "GetUsersByAddressesRequest": {
+        "type": "object",
+        "required": ["addresses"],
+        "properties": {
+          "addresses": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "description": "Array of wallet addresses to search for. Must contain at least one address.",
+            "example": [
+              "0x6294C7251D145bbe9B2f529FdD6D5D42E1d0DeA4",
+              "0x7d1afa7b718fb893db30a3abc0cfc608aacfebb0"
+            ]
+          }
+        }
       },
       "ErrorResponse": {
         "type": "object",

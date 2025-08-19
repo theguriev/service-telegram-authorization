@@ -263,19 +263,20 @@ describe.sequential("POST /users/by-addresses API Endpoint", () => {
     regularAccessToken = process.env.VALID_REGULAR_ACCESS_TOKEN;
 
     // Get some test addresses from existing users
-    const response = await $fetch("/users?limit=5", {
+    await $fetch("/users?limit=5", {
       baseURL: process.env.API_URL,
       method: "GET",
       headers: {
         Accept: "application/json",
         Cookie: `accessToken=${adminAccessToken}`,
       },
+      onResponse: ({ response }) => {
+        testUserAddresses = response._data
+          .filter((user) => user.address)
+          .map((user) => user.address)
+          .slice(0, 3); // Take first 3 addresses
+      },
     });
-
-    testUserAddresses = response
-      .filter((user) => user.address)
-      .map((user) => user.address)
-      .slice(0, 3); // Take first 3 addresses
   });
 
   describe("Authorization Checks", () => {

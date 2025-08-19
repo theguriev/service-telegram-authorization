@@ -30,7 +30,7 @@ export default defineEventHandler(async (event) => {
   try {
     const users = await ModelUser.find({
       address: { $in: addresses },
-    });
+    }); // Исключаем приватный ключ из результата
 
     return users;
   } catch (error) {
