@@ -1,5 +1,5 @@
 import { startOfDay, subDays } from "date-fns";
-import { toZonedTime } from 'date-fns-tz';
+import { toZonedTime } from "date-fns-tz";
 import { ObjectId } from "mongodb";
 import { PipelineStage } from "mongoose";
 import { z } from "zod";
@@ -11,13 +11,15 @@ const querySchema = z.object({
   search: z.string().optional(),
   report: z.enum(["all", "with", "without"]).default("all"),
   measurement: z.enum(["all", "with", "without"]).default("all"),
-  status: z.enum(["all", "new", "with balance", "without balance"]).default("all"),
+  status: z
+    .enum(["all", "new", "with balance", "without balance"])
+    .default("all"),
 });
 
 type FuncParams = z.infer<typeof querySchema> & {
-  managerTelegramId: number,
-  managerId: string,
-  userId: string
+  managerTelegramId: number;
+  managerId: string;
+  userId: string;
 };
 type QueryFunc = (
   params: FuncParams
@@ -25,28 +27,25 @@ type QueryFunc = (
 
 const getStartDate = (date: Date) => {
   const startDate = startOfDay(date);
-  const zonedDate = toZonedTime(date, 'Europe/Kyiv');
+  const zonedDate = toZonedTime(date, "Europe/Kyiv");
   const difference = date.getTime() - zonedDate.getTime();
   return new Date(startDate.getTime() + dateDifference.valueOf() + difference);
 };
 
 const queries: Record<string, QueryFunc> = {
-  getBaseQuery: ({
-    managerTelegramId,
-    managerId,
-    userId
-  }) => {
-    const baseQuery = userId !== managerId
-      ? {
-        $or: [
-          { "meta.managerId": managerTelegramId },
-          { _id: new ObjectId(managerId) },
-        ],
-      }
-      : { "meta.managerId": managerTelegramId };
+  getBaseQuery: ({ managerTelegramId, managerId, userId }) => {
+    const baseQuery =
+      userId !== managerId
+        ? {
+            $or: [
+              { "meta.managerId": managerTelegramId },
+              { _id: new ObjectId(managerId) },
+            ],
+          }
+        : { "meta.managerId": managerTelegramId };
 
     return {
-      $match: baseQuery
+      $match: baseQuery,
     };
   },
 
@@ -58,29 +57,30 @@ const queries: Record<string, QueryFunc> = {
     return {
       $match: {
         $or: [
-          { "username": { $regex: search, $options: "i" } },
-          { "firstName": { $regex: search, $options: "i" } },
-          { "lastName": { $regex: search, $options: "i" } },
+          { username: { $regex: search, $options: "i" } },
+          { firstName: { $regex: search, $options: "i" } },
+          { lastName: { $regex: search, $options: "i" } },
           { "meta.firstName": { $regex: search, $options: "i" } },
           { "meta.lastName": { $regex: search, $options: "i" } },
         ],
-      }
+      },
     };
   },
 
   getLookupMeasurementsQuery: () => [
     {
       $addFields: {
-        currentUserId: { $toString: "$_id" }
-      }
-    }, {
+        currentUserId: { $toString: "$_id" },
+      },
+    },
+    {
       $lookup: {
         from: "measurements",
         localField: "currentUserId",
         foreignField: "userId",
         as: "userMeasurements",
       },
-    }
+    },
   ],
 
   getReportQuery: ({ report }) => {
@@ -156,15 +156,12 @@ const queries: Record<string, QueryFunc> = {
       privateKey: 0,
       userMeasurements: 0,
       currentUserId: 0,
-    }
+    },
   }),
 };
 
 export default defineEventHandler(async (event) => {
-  const validated = await zodValidateData(
-    getQuery(event),
-    querySchema.parse
-  );
+  const validated = await zodValidateData(getQuery(event), querySchema.parse);
   const role = await getUserRole(event);
   const initialId = await getId(event);
   const userId = await getUserId(event);
@@ -204,10 +201,9 @@ export default defineEventHandler(async (event) => {
     return result;
   });
   const aggregateQueries = await Promise.all(asyncAggregateQueries);
-  const aggregateQuery = aggregateQueries.reduce<PipelineStage[]>((acc, query) =>
-    Array.isArray(query)
-      ? [...acc, ...query]
-      : [...acc, query],
+  const aggregateQuery = aggregateQueries.reduce<PipelineStage[]>(
+    (acc, query) =>
+      Array.isArray(query) ? [...acc, ...query] : [...acc, query],
     []
   );
 
@@ -231,15 +227,17 @@ export default defineEventHandler(async (event) => {
     };
   });
   const transformedData = await Promise.all(asyncTransformedData);
-  const filteredData = transformedData.filter((item) => {
-    if (status === "new") {
-      return !item.balance && !item.containsTransactions;
-    }
-    if (status === "with balance") {
-      return item.balance > 0;
-    }
-    return !item.balance;
-  }).map(item => omit(item, ['balance', 'containsTransactions']));
+  const filteredData = transformedData
+    .filter((item) => {
+      if (status === "new") {
+        return !item.balance && !item.containsTransactions;
+      }
+      if (status === "with balance") {
+        return item.balance > 0;
+      }
+      return !item.balance;
+    })
+    .map((item) => omit(item, ["balance", "containsTransactions"]));
 
   return filteredData.slice(offset, offset + limit);
 });

@@ -253,6 +253,205 @@ describe.sequential("GET /users API Endpoint", () => {
   });
 });
 
+describe.sequential("POST /users/by-addresses API Endpoint", () => {
+  let adminAccessToken;
+  let regularAccessToken;
+  let testUserAddresses;
+
+  beforeAll(async () => {
+    adminAccessToken = process.env.VALID_ADMIN_ACCESS_TOKEN;
+    regularAccessToken = process.env.VALID_REGULAR_ACCESS_TOKEN;
+
+    // Get some test addresses from existing users
+    const response = await $fetch("/users?limit=5", {
+      baseURL: process.env.API_URL,
+      method: "GET",
+      headers: {
+        Accept: "application/json",
+        Cookie: `accessToken=${adminAccessToken}`,
+      },
+    });
+
+    testUserAddresses = response
+      .filter((user) => user.address)
+      .map((user) => user.address)
+      .slice(0, 3); // Take first 3 addresses
+  });
+
+  describe("Authorization Checks", () => {
+    it("should return 401 if no access token is provided", async () => {
+      await $fetch("/users/by-addresses", {
+        baseURL: process.env.API_URL,
+        method: "POST",
+        body: { addresses: ["0x1234567890abcdef"] },
+        headers: { Accept: "application/json" },
+        ignoreResponseError: true,
+        onResponse: ({ response }) => {
+          expect(response.status).toBe(401);
+          expect(response._data.message).toBe("Unauthorized");
+        },
+      });
+    });
+  });
+
+  describe("Input Validation", () => {
+    it("should return 400 if addresses array is empty", async () => {
+      await $fetch("/users/by-addresses", {
+        baseURL: process.env.API_URL,
+        method: "POST",
+        body: { addresses: [] },
+        headers: {
+          Accept: "application/json",
+          Cookie: `accessToken=${adminAccessToken}`,
+        },
+        ignoreResponseError: true,
+        onResponse: ({ response }) => {
+          expect(response.status).toBe(400);
+          expect(response._data.message).toContain("Validation Error");
+        },
+      });
+    });
+
+    it("should return 400 if addresses field is missing", async () => {
+      await $fetch("/users/by-addresses", {
+        baseURL: process.env.API_URL,
+        method: "POST",
+        body: {},
+        headers: {
+          Accept: "application/json",
+          Cookie: `accessToken=${adminAccessToken}`,
+        },
+        ignoreResponseError: true,
+        onResponse: ({ response }) => {
+          expect(response.status).toBe(400);
+          expect(response._data.message).toContain("Validation Error");
+        },
+      });
+    });
+
+    it("should return 400 if addresses is not an array", async () => {
+      await $fetch("/users/by-addresses", {
+        baseURL: process.env.API_URL,
+        method: "POST",
+        body: { addresses: "not-an-array" },
+        headers: {
+          Accept: "application/json",
+          Cookie: `accessToken=${adminAccessToken}`,
+        },
+        ignoreResponseError: true,
+        onResponse: ({ response }) => {
+          expect(response.status).toBe(400);
+          expect(response._data.message).toContain("Validation Error");
+        },
+      });
+    });
+  });
+
+  describe("Functionality (as Admin)", () => {
+    it("should return empty array for non-existent addresses", async () => {
+      const nonExistentAddresses = [
+        "0x0000000000000000000000000000000000000000",
+        "0x1111111111111111111111111111111111111111",
+      ];
+
+      await $fetch("/users/by-addresses", {
+        baseURL: process.env.API_URL,
+        method: "POST",
+        body: { addresses: nonExistentAddresses },
+        headers: {
+          Accept: "application/json",
+          Cookie: `accessToken=${adminAccessToken}`,
+        },
+        onResponse: ({ response }) => {
+          expect(response.status).toBe(200);
+          expect(Array.isArray(response._data)).toBe(true);
+          expect(response._data.length).toBe(0);
+        },
+      });
+    });
+
+    it("should return users for existing addresses", async () => {
+      if (testUserAddresses.length === 0) {
+        console.log("No test addresses available, skipping test");
+        return;
+      }
+
+      await $fetch("/users/by-addresses", {
+        baseURL: process.env.API_URL,
+        method: "POST",
+        body: { addresses: testUserAddresses },
+        headers: {
+          Accept: "application/json",
+          Cookie: `accessToken=${adminAccessToken}`,
+        },
+        onResponse: ({ response }) => {
+          expect(response.status).toBe(200);
+          expect(Array.isArray(response._data)).toBe(true);
+          expect(response._data.length).toBeGreaterThan(0);
+
+          // Check that all returned users have addresses that were requested
+          response._data.forEach((user) => {
+            expect(testUserAddresses).toContain(user.address);
+            expect(user).toHaveProperty("_id");
+            expect(user).not.toHaveProperty("privateKey"); // Should be excluded
+          });
+        },
+      });
+    });
+
+    it("should handle mixed existing and non-existing addresses", async () => {
+      if (testUserAddresses.length === 0) {
+        console.log("No test addresses available, skipping test");
+        return;
+      }
+
+      const mixedAddresses = [
+        ...testUserAddresses.slice(0, 1),
+        "0x0000000000000000000000000000000000000000", // Non-existent
+      ];
+
+      await $fetch("/users/by-addresses", {
+        baseURL: process.env.API_URL,
+        method: "POST",
+        body: { addresses: mixedAddresses },
+        headers: {
+          Accept: "application/json",
+          Cookie: `accessToken=${adminAccessToken}`,
+        },
+        onResponse: ({ response }) => {
+          expect(response.status).toBe(200);
+          expect(Array.isArray(response._data)).toBe(true);
+          expect(response._data.length).toBe(1); // Only one existing user
+          expect(response._data[0].address).toBe(testUserAddresses[0]);
+        },
+      });
+    });
+
+    it("should handle single address in array", async () => {
+      if (testUserAddresses.length === 0) {
+        console.log("No test addresses available, skipping test");
+        return;
+      }
+
+      await $fetch("/users/by-addresses", {
+        baseURL: process.env.API_URL,
+        method: "POST",
+        body: { addresses: [testUserAddresses[0]] },
+        headers: {
+          Accept: "application/json",
+          Cookie: `accessToken=${adminAccessToken}`,
+        },
+        onResponse: ({ response }) => {
+          expect(response.status).toBe(200);
+          expect(Array.isArray(response._data)).toBe(true);
+          expect(response._data.length).toBe(1);
+          expect(response._data[0].address).toBe(testUserAddresses[0]);
+        },
+      });
+    });
+  });
+});
+
 describe.sequential("POST /users/switch API Endpoint", () => {
   let adminAccessToken;
   let regularAccessToken;
