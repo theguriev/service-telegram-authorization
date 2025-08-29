@@ -4,7 +4,7 @@ import type { EventHandlerRequest, H3Event } from "h3";
 import { ObjectId } from "mongodb";
 import { PipelineStage } from "mongoose";
 import { z } from "zod";
-import { dateDifference } from "~~/constants";
+import { dateDifference, weekends } from "~~/constants";
 
 export const usersRequestSchema = z.object({
   offset: z.coerce.number().int().default(0),
@@ -118,6 +118,20 @@ const queries: Record<string, QueryFunc> = {
         from: "measurements",
         localField: "currentUserId",
         foreignField: "userId",
+        let: { checkedDate: "$meta.checkedDate" },
+        pipeline: [
+          {
+            $addFields: {
+              notChecked: {
+                $or: [
+                  { $eq: [{ $type: "$$checkedDate" }, "missing"] },
+                  { $eq: ["$$checkedDate", null] },
+                  { $gte: ["$createdAt", { $toDate: "$$checkedDate" }] },
+                ]
+              }
+            }
+          }
+        ],
         as: "userMeasurements",
       },
     },
@@ -129,10 +143,13 @@ const queries: Record<string, QueryFunc> = {
     }
 
     const todayStart = getStartDate(new Date());
-    const yesterdayStart = subDays(todayStart, 1);
+    let startDate = subDays(todayStart, 1);
+    if (weekends.some(weekend => toZonedTime(startDate, "Europe/Kyiv").getDay() === weekend)) {
+      startDate = subDays(startDate, 1);
+    }
 
     const match = {
-      createdAt: { $gte: yesterdayStart, $lt: todayStart },
+      createdAt: { $gte: startDate, $lt: todayStart },
       type: "steps",
     };
 
@@ -140,7 +157,10 @@ const queries: Record<string, QueryFunc> = {
       return {
         $match: {
           userMeasurements: {
-            $elemMatch: match,
+            $elemMatch: {
+              ...match,
+              notChecked: true
+            },
           },
         },
       };
@@ -163,10 +183,13 @@ const queries: Record<string, QueryFunc> = {
     }
 
     const todayStart = getStartDate(new Date());
-    const yesterdayStart = subDays(todayStart, 1);
+    let startDate = subDays(todayStart, 1);
+    if (weekends.some(weekend => toZonedTime(startDate, "Europe/Kyiv").getDay() === weekend)) {
+      startDate = subDays(startDate, 1);
+    }
 
     const match = {
-      createdAt: { $gte: yesterdayStart, $lt: todayStart },
+      createdAt: { $gte: startDate, $lt: todayStart },
       type: { $ne: "steps" },
     };
 
@@ -174,7 +197,10 @@ const queries: Record<string, QueryFunc> = {
       return {
         $match: {
           userMeasurements: {
-            $elemMatch: match,
+            $elemMatch: {
+              ...match,
+              notChecked: true
+            },
           },
         },
       };
@@ -246,7 +272,6 @@ const getUsers = async (userId: string, event: H3Event<EventHandlerRequest>, val
   );
 
   const data = await ModelUser.aggregate(aggregateQuery);
-
   const { status, offset, limit } = validated;
   if (status === "all") {
     return withOffsets ? data.slice(offset, offset + limit) : data;

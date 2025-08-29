@@ -16,3 +16,4 @@ export const regularId = "6808bcfb77143eceb802c5a8";
 export const bllsBase = "https://api.blls.me";
 
 export const dateDifference = addHours(0, 3);
+export const weekends = [0 /* Sunday */];
