@@ -1,3 +1,5 @@
+import { adminId, regularId } from "../constants";
+
 const baseURL = process.env.API_URL;
 
 describe.sequential("GET /users API Endpoint", () => {
@@ -102,7 +104,7 @@ describe.sequential("GET /users API Endpoint", () => {
           expect(response.status).toBe(200);
           expect(Array.isArray(response._data)).toBe(true);
           expect(response._data.length).toBeGreaterThanOrEqual(1);
-          response._data.forEach((user) => {
+          response._data.forEach((user: any) => {
             const fn = user.firstName || "";
             const ln = user.lastName || "";
             expect(
@@ -174,7 +176,7 @@ describe.sequential("GET /users API Endpoint", () => {
           expect(Array.isArray(response._data)).toBe(true);
           expect(response._data.length).toBeGreaterThanOrEqual(1);
           const hasAdminUser = response._data.some(
-            (user) => user.role === "admin"
+            (user: any) => user.role === "admin"
           );
           expect(hasAdminUser).toBe(true);
         },
@@ -193,7 +195,7 @@ describe.sequential("GET /users API Endpoint", () => {
           expect(response.status).toBe(200);
           expect(Array.isArray(response._data)).toBe(true);
           const hasAdminUser = response._data.some(
-            (user) => user.role === "admin"
+            (user: any) => user.role === "admin"
           );
           expect(hasAdminUser).toBe(false);
         },
@@ -254,9 +256,9 @@ describe.sequential("GET /users API Endpoint", () => {
 });
 
 describe.sequential("POST /users/by-addresses API Endpoint", () => {
-  let adminAccessToken;
-  let regularAccessToken;
-  let testUserAddresses;
+  let adminAccessToken: string;
+  let regularAccessToken: string;
+  let testUserAddresses: string[];
 
   beforeAll(async () => {
     adminAccessToken = process.env.VALID_ADMIN_ACCESS_TOKEN;
@@ -272,8 +274,8 @@ describe.sequential("POST /users/by-addresses API Endpoint", () => {
       },
       onResponse: ({ response }) => {
         testUserAddresses = response._data
-          .filter((user) => user.address)
-          .map((user) => user.address)
+          .filter((user: any) => user.address)
+          .map((user: any) => user.address)
           .slice(0, 3); // Take first 3 addresses
       },
     });
@@ -391,7 +393,7 @@ describe.sequential("POST /users/by-addresses API Endpoint", () => {
           expect(response._data.length).toBeGreaterThan(0);
 
           // Check that all returned users have addresses that were requested
-          response._data.forEach((user) => {
+          response._data.forEach((user: any) => {
             expect(testUserAddresses).toContain(user.address);
             expect(user).toHaveProperty("_id");
             expect(user).not.toHaveProperty("privateKey"); // Should be excluded
@@ -454,14 +456,16 @@ describe.sequential("POST /users/by-addresses API Endpoint", () => {
 });
 
 describe.sequential("POST /users/switch API Endpoint", () => {
-  let adminAccessToken;
-  let regularAccessToken;
-  let testUserId;
+  let adminAccessToken: string;
+  let regularAccessToken: string;
+  let testUserId: string;
+  let secret: string;
 
   beforeAll(async () => {
     // Use environment variables or setup logic to get tokens and a test user
     adminAccessToken = process.env.VALID_ADMIN_ACCESS_TOKEN;
     regularAccessToken = process.env.VALID_REGULAR_ACCESS_TOKEN;
+    secret = process.env.SECRET;
 
     const body = {
       id: 379669522,
@@ -543,7 +547,7 @@ describe.sequential("POST /users/switch API Endpoint", () => {
     });
   });
 
-  let switchedAccessToken;
+  let switchedAccessToken: string;
 
   it("should switch tokens and return user if admin and user exists", async () => {
     if (!testUserId) return;
@@ -580,6 +584,262 @@ describe.sequential("POST /users/switch API Endpoint", () => {
       },
       onResponse: ({ response }) => {
         expect(response.status).toBe(200);
+      },
+    });
+  });
+
+  it("should return 404 if user not found in query", async () => {
+    await $fetch("/users/switch", {
+      baseURL,
+      method: "POST",
+      body: {
+        id: testUserId,
+        usersRequest: { }
+      },
+      headers: {
+        Cookie: `accessToken=${adminAccessToken}`,
+      },
+      ignoreResponseError: true,
+      onResponse: ({ response }) => {
+        expect(response.status).toBe(404);
+      },
+    });
+  });
+
+  it("previous switch should return 500 if not authenticated", async () => {
+    await $fetch("/users/switch/previous", {
+      baseURL,
+      method: "POST",
+      ignoreResponseError: true,
+      onResponse: ({ response }) => {
+        expect(response.status).toBe(500);
+      },
+    });
+  });
+
+  it("next switch should return 500 if not authenticated", async () => {
+    await $fetch("/users/switch/next", {
+      baseURL,
+      method: "POST",
+      ignoreResponseError: true,
+      onResponse: ({ response }) => {
+        expect(response.status).toBe(500);
+      },
+    });
+  });
+
+  it("previous switch should return 403 if not admin", async () => {
+    await $fetch("/users/switch/previous", {
+      baseURL,
+      method: "POST",
+      headers: {
+        Cookie: `accessToken=${regularAccessToken}`,
+      },
+      ignoreResponseError: true,
+      onResponse: ({ response }) => {
+        expect(response.status).toBe(403);
+      },
+    });
+  });
+
+  it("next switch should return 403 if not admin", async () => {
+    await $fetch("/users/switch/next", {
+      baseURL,
+      method: "POST",
+      headers: {
+        Cookie: `accessToken=${regularAccessToken}`,
+      },
+      ignoreResponseError: true,
+      onResponse: ({ response }) => {
+        expect(response.status).toBe(403);
+      },
+    });
+  });
+
+  it("previous switch should return 404 if not defined switch info", async () => {
+    await $fetch("/users/switch/previous", {
+      baseURL,
+      method: "POST",
+      headers: {
+        Cookie: `accessToken=${adminAccessToken}`,
+      },
+      ignoreResponseError: true,
+      onResponse: ({ response }) => {
+        expect(response.status).toBe(404);
+      },
+    });
+  });
+
+  it("next switch should return 404 if not defined switch info", async () => {
+    await $fetch("/users/switch/next", {
+      baseURL,
+      method: "POST",
+      headers: {
+        Cookie: `accessToken=${adminAccessToken}`,
+      },
+      ignoreResponseError: true,
+      onResponse: ({ response }) => {
+        expect(response.status).toBe(404);
+      },
+    });
+  });
+
+  let switchAccessTokenData: any;
+  it("should switch tokens and return user if admin and user exists in query", async () => {
+    if (!testUserId) return;
+    const response = await $fetch.raw("/users/switch", {
+      baseURL,
+      method: "POST",
+      body: {
+        id: regularId,
+        usersRequest: { }
+      },
+      headers: {
+        Cookie: `accessToken=${adminAccessToken}`,
+      }
+    });
+
+    expect(response.status).toBe(200);
+    expect(response._data).toHaveProperty("_id", regularId);
+    const setCookie = extractSetCookie(response.headers);
+    const refreshTokenObj = setCookie.find(
+      (cookie) => cookie.name === "refreshToken"
+    );
+    const accessTokenObj = setCookie.find(
+      (cookie) => cookie.name === "accessToken"
+    );
+    expect(refreshTokenObj).toBeDefined();
+    expect(accessTokenObj).toBeDefined();
+    switchedAccessToken = accessTokenObj.value;
+    switchAccessTokenData = await verify(switchedAccessToken, secret);
+    expect(switchAccessTokenData).toHaveProperty("userId", regularId);
+    expect(switchAccessTokenData).toHaveProperty("id", adminId);
+    expect(switchAccessTokenData).toHaveProperty("role", "admin");
+    expect(switchAccessTokenData).toHaveProperty("switchInfoId");
+    expect(switchAccessTokenData).toHaveProperty("switchInfoIndex", 1);
+    expect(switchAccessTokenData).toHaveProperty("switchInfoLength", 3);
+  });
+
+  it("previous switch should return 200 and admin user if switch info is correct", async () => {
+    if (!testUserId) return;
+    const response = await $fetch.raw("/users/switch/previous", {
+      baseURL,
+      method: "POST",
+      headers: {
+        Cookie: `accessToken=${switchedAccessToken}`,
+      }
+    });
+
+    expect(response.status).toBe(200);
+    expect(response._data.user).toHaveProperty("_id", adminId);
+    expect(response._data).toHaveProperty("status", "return");
+    const setCookie = extractSetCookie(response.headers);
+    const refreshTokenObj = setCookie.find(
+      (cookie) => cookie.name === "refreshToken"
+    );
+    const accessTokenObj = setCookie.find(
+      (cookie) => cookie.name === "accessToken"
+    );
+    expect(refreshTokenObj).toBeDefined();
+    expect(accessTokenObj).toBeDefined();
+    switchedAccessToken = accessTokenObj.value;
+    switchAccessTokenData = await verify(switchedAccessToken, secret);
+    expect(switchAccessTokenData).toHaveProperty("userId", adminId);
+    expect(switchAccessTokenData).toHaveProperty("id", adminId);
+    expect(switchAccessTokenData).toHaveProperty("role", "admin");
+    expect(switchAccessTokenData).toHaveProperty("switchInfoId");
+    expect(switchAccessTokenData).toHaveProperty("switchInfoIndex", 0);
+    expect(switchAccessTokenData).toHaveProperty("switchInfoLength", 3);
+  });
+
+  it("previous switch should return 400 if already switched first user", async () => {
+    await $fetch("/users/switch/previous", {
+      baseURL,
+      method: "POST",
+      headers: {
+        Cookie: `accessToken=${switchedAccessToken}`,
+      },
+      ignoreResponseError: true,
+      onResponse: ({ response }) => {
+        expect(response.status).toBe(400);
+      },
+    });
+  });
+
+  it("next switch should return 200 and regular user if switch info is correct", async () => {
+    if (!testUserId) return;
+    const response = await $fetch.raw("/users/switch/next", {
+      baseURL,
+      method: "POST",
+      headers: {
+        Cookie: `accessToken=${switchedAccessToken}`,
+      }
+    });
+
+    expect(response.status).toBe(200);
+    expect(response._data.user).toHaveProperty("_id", regularId);
+    expect(response._data).toHaveProperty("status", "success");
+    const setCookie = extractSetCookie(response.headers);
+    const refreshTokenObj = setCookie.find(
+      (cookie) => cookie.name === "refreshToken"
+    );
+    const accessTokenObj = setCookie.find(
+      (cookie) => cookie.name === "accessToken"
+    );
+    expect(refreshTokenObj).toBeDefined();
+    expect(accessTokenObj).toBeDefined();
+    switchedAccessToken = accessTokenObj.value;
+    switchAccessTokenData = await verify(switchedAccessToken, secret);
+    expect(switchAccessTokenData).toHaveProperty("userId", regularId);
+    expect(switchAccessTokenData).toHaveProperty("id", adminId);
+    expect(switchAccessTokenData).toHaveProperty("role", "admin");
+    expect(switchAccessTokenData).toHaveProperty("switchInfoId");
+    expect(switchAccessTokenData).toHaveProperty("switchInfoIndex", 1);
+    expect(switchAccessTokenData).toHaveProperty("switchInfoLength", 3);
+  });
+
+  it("next switch should return 200 and admin user if switch info is correct", async () => {
+    if (!testUserId) return;
+    const response = await $fetch.raw("/users/switch/next", {
+      baseURL,
+      method: "POST",
+      headers: {
+        Cookie: `accessToken=${switchedAccessToken}`,
+      }
+    });
+
+    expect(response.status).toBe(200);
+    expect(response._data.user).toHaveProperty("_id", adminId);
+    expect(response._data).toHaveProperty("status", "return");
+    const setCookie = extractSetCookie(response.headers);
+    const refreshTokenObj = setCookie.find(
+      (cookie) => cookie.name === "refreshToken"
+    );
+    const accessTokenObj = setCookie.find(
+      (cookie) => cookie.name === "accessToken"
+    );
+    expect(refreshTokenObj).toBeDefined();
+    expect(accessTokenObj).toBeDefined();
+    switchedAccessToken = accessTokenObj.value;
+    switchAccessTokenData = await verify(switchedAccessToken, secret);
+    expect(switchAccessTokenData).toHaveProperty("userId", adminId);
+    expect(switchAccessTokenData).toHaveProperty("id", adminId);
+    expect(switchAccessTokenData).toHaveProperty("role", "admin");
+    expect(switchAccessTokenData).toHaveProperty("switchInfoId");
+    expect(switchAccessTokenData).toHaveProperty("switchInfoIndex", 2);
+    expect(switchAccessTokenData).toHaveProperty("switchInfoLength", 3);
+  });
+
+  it("next switch should return 400 if already switched last user", async () => {
+    await $fetch("/users/switch/next", {
+      baseURL,
+      method: "POST",
+      headers: {
+        Cookie: `accessToken=${switchedAccessToken}`,
+      },
+      ignoreResponseError: true,
+      onResponse: ({ response }) => {
+        expect(response.status).toBe(400);
       },
     });
   });

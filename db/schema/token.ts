@@ -13,6 +13,19 @@ const schema = new Schema(
       default: "user",
       required: true,
     },
+    switchInfoId: {
+      type: String,
+      ref: "Switch Infos",
+      required: false,
+    },
+    switchInfoIndex: {
+      type: Number,
+      required: false,
+    },
+    switchInfoLength: {
+      type: Number,
+      required: false,
+    },
   },
   { timestamps: true }
 );

@@ -22,6 +22,11 @@ export default eventHandler(async (event) => {
     userId,
     role: globalUser.role || "user",
     id: oldRefreshTokenDocument.id,
+    switchInfo: {
+      id: oldRefreshTokenDocument.switchInfoId,
+      index: oldRefreshTokenDocument.switchInfoIndex,
+      length: oldRefreshTokenDocument.switchInfoLength
+    }
   });
   await deleteByUserId();
   await save();

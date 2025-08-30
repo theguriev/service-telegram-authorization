@@ -693,14 +693,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "id": {
-                    "type": "string",
-                    "description": "Target user _id (MongoDB ObjectId)"
-                  }
-                },
-                "required": ["id"]
+                "$ref": "#/components/schemas/SwitchUserRequest"
               }
             }
           }
@@ -753,6 +746,172 @@
             "content": {
               "application/json": {
                 "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        },
+        "security": [{ "cookieAuth": [] }]
+      }
+    },
+    "/users/switch/next": {
+      "post": {
+        "tags": ["users"],
+        "summary": "Switch to next user in the switch sequence",
+        "description": "Switches to the next user in the admin switch sequence. Requires active switch session.",
+        "operationId": "switchToNextUser",
+        "responses": {
+          "200": {
+            "description": "Successfully switched to next user",
+            "headers": {
+              "Set-Cookie": {
+                "schema": {
+                  "type": "string",
+                  "example": "accessToken=xyz; refreshToken=abc"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "enum": ["success", "return"],
+                      "description": "Status of the switch operation"
+                    },
+                    "user": {
+                      "$ref": "#/components/schemas/UserResponse"
+                    },
+                    "usersRequest": {
+                      "$ref": "#/components/schemas/UsersRequest"
+                    }
+                  },
+                  "required": ["status", "user"]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Already at the last user or invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Not authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - Not an admin",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Switch info not found or next user not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [{ "cookieAuth": [] }]
+      }
+    },
+    "/users/switch/previous": {
+      "post": {
+        "tags": ["users"],
+        "summary": "Switch to previous user in the switch sequence",
+        "description": "Switches to the previous user in the admin switch sequence. Requires active switch session.",
+        "operationId": "switchToPreviousUser",
+        "responses": {
+          "200": {
+            "description": "Successfully switched to previous user",
+            "headers": {
+              "Set-Cookie": {
+                "schema": {
+                  "type": "string",
+                  "example": "accessToken=xyz; refreshToken=abc"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "enum": ["success", "return"],
+                      "description": "Status of the switch operation"
+                    },
+                    "user": {
+                      "$ref": "#/components/schemas/UserResponse"
+                    },
+                    "usersRequest": {
+                      "$ref": "#/components/schemas/UsersRequest"
+                    }
+                  },
+                  "required": ["status", "user"]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "No previous user available or invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Not authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - Not an admin",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Switch info not found or previous user not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
               }
             }
           }
@@ -949,6 +1108,56 @@
             "description": "User metadata where keys are strings and values can be strings or numbers."
           }
         }
+      },
+      "UsersRequest": {
+        "type": "object",
+        "properties": {
+          "offset": {
+            "type": "integer",
+            "default": 0,
+            "description": "Number of users to skip"
+          },
+          "limit": {
+            "type": "integer",
+            "default": 10,
+            "description": "Maximum number of users to return"
+          },
+          "search": {
+            "type": "string",
+            "description": "Search term to filter users by name or username"
+          },
+          "report": {
+            "type": "string",
+            "enum": ["all", "with", "without"],
+            "default": "all",
+            "description": "Filter users by report status"
+          },
+          "measurement": {
+            "type": "string",
+            "enum": ["all", "with", "without"],
+            "default": "all",
+            "description": "Filter users by measurement status"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["all", "new", "with balance", "without balance"],
+            "default": "all",
+            "description": "Filter users by status"
+          }
+        }
+      },
+      "SwitchUserRequest": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Target user _id (MongoDB ObjectId)"
+          },
+          "usersRequest": {
+            "$ref": "#/components/schemas/UsersRequest"
+          }
+        },
+        "required": ["id"]
       },
       "TransactionResponse": {
         "type": "object",
