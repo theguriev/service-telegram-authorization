@@ -37,7 +37,7 @@ export default eventHandler(async (event) => {
 
   const previousUserId = currentUserIndex === 1
     ? initialId
-    : switchInfo.usersRequest[currentUserIndex - 2];
+    : switchInfo.users[currentUserIndex - 2];
   const previousUser = await ModelUser.findById(previousUserId);
   if (!previousUser) {
     throw createError({ message: "Previous user not found", status: 404 });

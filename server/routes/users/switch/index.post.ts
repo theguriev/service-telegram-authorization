@@ -33,7 +33,7 @@ export default eventHandler(async (event) => {
     const usersAfterId = users.slice(userIndex);
 
     const switchInfo = await ModelSwitchInfo.create({
-      userId: user._id.toString(),
+      userId: admin._id.toString(),
       users: usersAfterId.map((user) => user._id.toString()),
       usersRequest: new Map(Object.entries(usersRequest))
     });
