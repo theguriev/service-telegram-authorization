@@ -62,14 +62,6 @@ export default eventHandler(async (event) => {
     });
   }
   if (process.env.VITEST !== "true") {
-    const balance = await getBalance(wallet.privateKey);
-    if (balance > 0) {
-      throw createError({
-        message: "User has a balance, cannot continue subscription",
-        status: 400,
-      });
-    }
-
     const transactions = await getTransactions(wallet.privateKey);
 
     const subscriptionDuration = transactions.length ? 60 : 62;
