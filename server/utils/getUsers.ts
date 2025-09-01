@@ -15,46 +15,8 @@ export const usersRequestSchema = z.object({
   status: z
     .enum(["all", "new", "with balance", "without balance"])
     .default("all"),
+  archived: z.coerce.boolean().default(false),
 });
-
-export const usersRequestSwaggerSchema = {
-  type: "object",
-  properties: {
-    offset: {
-      type: "integer",
-      default: 0,
-      description: "Number of items to skip for pagination"
-    },
-    limit: {
-      type: "integer",
-      default: 10,
-      description: "Maximum number of items to return"
-    },
-    search: {
-      type: "string",
-      description: "Search term to filter users by username, firstName, or lastName"
-    },
-    report: {
-      type: "string",
-      enum: ["all", "with", "without"],
-      default: "all",
-      description: "Filter users by report status"
-    },
-    measurement: {
-      type: "string",
-      enum: ["all", "with", "without"],
-      default: "all",
-      description: "Filter users by measurement status"
-    },
-    status: {
-      type: "string",
-      enum: ["all", "new", "with balance", "without balance"],
-      default: "all",
-      description: "Filter users by account status"
-    }
-  },
-  required: []
-} as const;
 
 type FuncParams = z.infer<typeof usersRequestSchema> & {
   managerTelegramId: number;
@@ -104,6 +66,25 @@ const queries: Record<string, QueryFunc> = {
           { "meta.lastName": { $regex: search, $options: "i" } },
         ],
       },
+    };
+  },
+
+  getArchivedQuery: ({ archived }) => {
+    if (!archived) {
+      return {
+        $match: {
+          $or: [
+            { "meta.archived": { $exists: false } },
+            { "meta.archived": false }
+          ]
+        }
+      }
+    }
+
+    return {
+      $match: {
+        "meta.archived": true
+      }
     };
   },
 

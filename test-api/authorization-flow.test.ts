@@ -1,4 +1,5 @@
 import type { FetchResponse } from "ofetch";
+import { regularId } from "../constants";
 
 const body = {
   id: 379669527,
@@ -13,6 +14,7 @@ const body = {
 const hash = generateTelegramHash(body, process.env.NITRO_BOT_TOKEN);
 let validRefreshToken: string;
 let validAccessToken: string;
+let validUserId: string;
 
 const accessAndRefreshToBeDefined = (response: FetchResponse<any>) => {
   const setCookie = extractSetCookie(response.headers);
@@ -32,6 +34,14 @@ const accessAndRefreshToBeDefined = (response: FetchResponse<any>) => {
 };
 
 describe.sequential("Authorization", () => {
+  let adminAccessToken: string;
+  let regularAccessToken: string;
+
+  beforeAll(async () => {
+    adminAccessToken = process.env.VALID_ADMIN_ACCESS_TOKEN;
+    regularAccessToken = process.env.VALID_REGULAR_ACCESS_TOKEN;
+  });
+
   describe("POST /login", () => {
     it("gets 400 on validation errors", async () => {
       await $fetch("/login", {
@@ -100,6 +110,7 @@ describe.sequential("Authorization", () => {
           expect(response._data.privateKey).toBeUndefined();
           expect(response._data.address).toBeDefined();
           accessAndRefreshToBeDefined(response);
+          validUserId = response._data._id;
         },
       });
     });
@@ -258,5 +269,108 @@ describe.sequential("Authorization", () => {
         },
       });
     });
+
+    it("validation error on wrong userId", async () => {
+      await $fetch("/update-meta", {
+        baseURL: process.env.API_URL,
+        method: "PUT",
+        headers: {
+          Accept: "application/json",
+          Cookie: `accessToken=${validAccessToken}`,
+        },
+        ignoreResponseError: true,
+        body: {
+          meta: { firstName: "John", lastName: "Doe" },
+          userId: "wrongUserId",
+        },
+        onResponse: ({ response }) => {
+          expect(response.status).toBe(400);
+        },
+      });
+    });
+
+    it("authorization error on user updating other user", async () => {
+      await $fetch("/update-meta", {
+        baseURL: process.env.API_URL,
+        method: "PUT",
+        headers: {
+          Accept: "application/json",
+          Cookie: `accessToken=${validAccessToken}`,
+        },
+        ignoreResponseError: true,
+        body: {
+          meta: { firstName: "John", lastName: "Doe" },
+          userId: regularId,
+        },
+        onResponse: ({ response }) => {
+          expect(response.status).toBe(403);
+        },
+      });
+    });
+
+    it("user not found error on updating non existing user", async () => {
+      await $fetch("/update-meta", {
+        baseURL: process.env.API_URL,
+        method: "PUT",
+        headers: {
+          Accept: "application/json",
+          Cookie: `accessToken=${adminAccessToken}`,
+        },
+        ignoreResponseError: true,
+        body: {
+          meta: { firstName: "John", lastName: "Doe" },
+          userId: "000000000000000000000000",
+        },
+        onResponse: ({ response }) => {
+          expect(response.status).toBe(409);
+        },
+      });
+    });
+
+    it("success on updating existing user by admin", async () => {
+      await $fetch("/update-meta", {
+        baseURL: process.env.API_URL,
+        method: "PUT",
+        headers: {
+          Accept: "application/json",
+          Cookie: `accessToken=${adminAccessToken}`,
+        },
+        body: {
+          meta: { firstName: "John", lastName: "Doe" },
+          userId: validUserId,
+        },
+        onResponse: ({ response }) => {
+          expect(response.status).toBe(200);
+          expect(response._data._id).toBe(validUserId);
+          expect(response._data.meta.firstName).toBe("John");
+          expect(response._data.meta.lastName).toBe("Doe");
+          expect(response._data.privateKey).toBeUndefined();
+          expect(response._data.address).toBeDefined();
+        },
+      });
+    });
+
+    it("success on updating existing user by himself", async () => {
+      await $fetch("/update-meta", {
+        baseURL: process.env.API_URL,
+        method: "PUT",
+        headers: {
+          Accept: "application/json",
+          Cookie: `accessToken=${validAccessToken}`,
+        },
+        body: {
+          meta: { firstName: "John", lastName: "Doe" },
+          userId: validUserId,
+        },
+        onResponse: ({ response }) => {
+          expect(response.status).toBe(200);
+          expect(response._data._id).toBe(validUserId);
+          expect(response._data.meta.firstName).toBe("John");
+          expect(response._data.meta.lastName).toBe("Doe");
+          expect(response._data.privateKey).toBeUndefined();
+          expect(response._data.address).toBeDefined();
+        },
+      });
+    })
   });
 });
