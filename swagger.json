@@ -618,6 +618,16 @@
               "enum": ["all", "new", "with balance", "without balance"],
               "default": "all"
             }
+          },
+          {
+            "name": "archived",
+            "in": "query",
+            "description": "Filter users by archived status",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
           }
         ],
         "responses": {
@@ -1143,6 +1153,11 @@
             "enum": ["all", "new", "with balance", "without balance"],
             "default": "all",
             "description": "Filter users by status"
+          },
+          "archived": {
+            "type": "boolean",
+            "default": false,
+            "description": "Filter users by archived status"
           }
         }
       },
@@ -1216,6 +1231,11 @@
               "oneOf": [{ "type": "string" }, { "type": "number" }]
             },
             "description": "User metadata where keys are strings and values can be strings or numbers."
+          },
+          "userId": {
+            "type": "string",
+            "description": "ID of the user to update metadata for",
+            "pattern": "^[0-9a-fA-F]{24}$"
           }
         },
         "required": ["meta"]
