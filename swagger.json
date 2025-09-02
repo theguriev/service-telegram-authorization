@@ -1113,7 +1113,12 @@
           "meta": {
             "type": "object",
             "additionalProperties": {
-              "oneOf": [{ "type": "string" }, { "type": "number" }]
+              "anyOf": [
+                { "type": "string" },
+                { "type": "number" },
+                { "type": "boolean" }
+              ],
+              "nullable": true
             },
             "description": "User metadata where keys are strings and values can be strings or numbers."
           }
@@ -1228,7 +1233,12 @@
           "meta": {
             "type": "object",
             "additionalProperties": {
-              "oneOf": [{ "type": "string" }, { "type": "number" }]
+              "anyOf": [
+                { "type": "string" },
+                { "type": "number" },
+                { "type": "boolean" }
+              ],
+              "nullable": true
             },
             "description": "User metadata where keys are strings and values can be strings or numbers."
           },
