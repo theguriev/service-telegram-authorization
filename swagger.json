@@ -1095,8 +1095,13 @@
           },
           "role": {
             "type": "string",
-            "enum": ["user", "admin"],
             "description": "User role in the system"
+          },
+          "permissions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           },
           "address": {
             "type": "string",

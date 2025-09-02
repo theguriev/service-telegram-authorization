@@ -19,7 +19,9 @@ export default defineTask({
       },
       {
         $match: {
-          "user.role": { $ne: "admin" },
+          user: {
+            $elemMatch: matchCan("daily")
+          }
         },
       },
     ]);

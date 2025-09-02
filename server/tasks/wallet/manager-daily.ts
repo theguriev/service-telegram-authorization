@@ -12,7 +12,7 @@ export default defineTask({
       {
         $match: {
           'meta.managerId': { $exists: true, $ne: null },
-          'role': { $nin: ['admin'] },
+          ...matchCan("manager-daily"),
         },
       },
       {

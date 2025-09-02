@@ -31,7 +31,10 @@ export default eventHandler(async (event) => {
   if (!owner) {
     throw createError({ message: "Transactions owner not found", status: 404 });
   }
-  if (owner.meta?.get("managerId") !== user.id && user.role !== "admin") {
+  if (!(
+    can(user, "get-all-users-transactions") ||
+    owner.meta?.get("managerId") === user.id && can(user, "get-managed-users-transactions")
+  )) {
     throw createError({ message: "You are not authorized to access this resource", status: 403 });
   }
 

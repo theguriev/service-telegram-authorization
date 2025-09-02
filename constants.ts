@@ -8,6 +8,8 @@ export const imports = [
   { name: "afterAll", from: "vitest" },
   { name: "v4", as: "uuidv4", from: "uuid" },
   { name: "parse", from: "set-cookie-parser" },
+  { name: "can", from: "~/permission" },
+  { name: "matchCan", from: "~/permission" },
 ];
 
 export const adminId = "6808bcfb77143eceb802c5a7";
