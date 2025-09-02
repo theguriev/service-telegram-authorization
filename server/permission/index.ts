@@ -8,11 +8,10 @@ const permissions = {
 } as const;
 
 export const can = (user: HydratedDocument<InferSchemaType<typeof schemaUser>>, permission: string | string[]) => {
-  const { role, permissions } = user;
-  console.log(permissions);
+  const { role, permissions: userPermissions } = user;
   const rolePermissions = permissions[role || "user"] ?? [];
   const allPermissions = [
-    ...permissions,
+    ...userPermissions,
     ...rolePermissions
   ];
 

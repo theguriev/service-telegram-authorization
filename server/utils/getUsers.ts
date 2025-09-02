@@ -36,21 +36,21 @@ const getStartDate = (date: Date) => {
 };
 
 const queries: Record<string, QueryFunc> = {
-  getBaseQuery: ({ managerTelegramId, managerId, userId, manager }) => {
+  getBaseQuery: ({ managerTelegramId, userId, manager }) => {
     if (can(manager, "get-all-users")) {
-      return userId !== managerId ? {
+      return userId === manager._id.toString() ? {
         $match: {
-          _id: new ObjectId(managerId)
+          _id: { $ne: manager._id }
         }
       } : [];
     }
 
     return {
-      $match: userId !== managerId
+      $match: userId !== manager._id.toString()
         ? {
             $or: [
               { "meta.managerId": managerTelegramId },
-              { _id: new ObjectId(managerId) },
+              { _id: manager._id },
             ],
           }
         : { "meta.managerId": managerTelegramId },
