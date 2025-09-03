@@ -18,7 +18,7 @@ export default defineTask({
       {
         $match: {
           user: {
-            $elemMatch: matchCan("daily-spend"),
+            $elemMatch: matchCan("wallet:daily-spend"),
           },
         },
       },

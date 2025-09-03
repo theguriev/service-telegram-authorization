@@ -12,7 +12,7 @@ export default defineTask({
       {
         $match: {
           'meta.managerId': { $exists: true, $ne: null },
-          ...matchCan("manager-daily"),
+          ...matchCan("wallet:manager-daily"),
         },
       },
       {
