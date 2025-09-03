@@ -165,6 +165,37 @@ describe.sequential("Authorization", () => {
     });
   });
 
+  describe("GET /initial", () => {
+    it("gets 500 on wrong access token", async () => {
+      await $fetch("/initial", {
+        baseURL: process.env.API_URL,
+        headers: {
+          Accept: "application/json",
+          Cookie: "accessToken=invalid;",
+        },
+        ignoreResponseError: true,
+        onResponse: ({ response }) => {
+          expect(response.status).toBe(500);
+        },
+      });
+    });
+
+    it("gets 200 valid user", async () => {
+      await $fetch("/initial", {
+        baseURL: process.env.API_URL,
+        headers: {
+          Accept: "application/json",
+          Cookie: `accessToken=${validAccessToken};`,
+        },
+        onResponse: ({ response }) => {
+          expect(response.status).toBe(200);
+          expect(response._data.privateKey).toBeUndefined();
+          expect(response._data.address).toBeDefined();
+        },
+      });
+    });
+  })
+
   describe("POST /login/web-app", () => {
     it("gets 400 on validation errors", async () => {
       await $fetch("/login/web-app", {
