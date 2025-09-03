@@ -1154,7 +1154,8 @@
             },
             "description": "User metadata where keys are strings and values can be strings or numbers."
           }
-        }
+        },
+        "required": ["_id", "id", "firstName", "address", "hash", "permissions", "updatedAt", "createdAt"]
       },
       "UsersRequest": {
         "type": "object",
