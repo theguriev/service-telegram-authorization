@@ -8,9 +8,13 @@ export default eventHandler(async (event) => {
     throw createError({ message: "Unauthorized", status: 401 });
   }
 
-  const admin = await ModelUser.findById(initialId);
-  if (!admin || admin.role !== "admin") {
-    throw createError({ message: "Forbidden: Not an admin", status: 403 });
+  const manager = await ModelUser.findById(initialId);
+  if (!manager) {
+    throw createError({ message: "Initial user not found", status: 404 });
+  }
+
+  if (!can(manager, "switch-next-user")) {
+    throw createError({ message: "Forbidden: can't switch next user", status: 403 });
   }
 
   if (!userId) {
@@ -47,7 +51,7 @@ export default eventHandler(async (event) => {
     event,
     userId: nextUserId,
     id: initialId,
-    role: "admin",
+    role: manager.role || "user",
     switchInfo: {
       id: switchInfo._id.toString(),
       index: currentUserIndex + 1,
