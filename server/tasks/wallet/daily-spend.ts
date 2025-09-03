@@ -12,32 +12,54 @@ export default defineTask({
           from: "users",
           localField: "userId",
           foreignField: "_id",
-          as: "user",
+          pipeline: [
+            {
+              $match: {
+                role: { $ne: "admin" },
+              },
+            },
+            {
+              $lookup: {
+                from: 'users',
+                localField: "meta.managerId",
+                foreignField: "id",
+                pipeline: [
+                  {
+                    $limit: 1
+                  }
+                ],
+                as: 'managers',
+              },
+            },
+            {
+              $match: {
+                managers: { $ne: [] }
+              }
+            },
+            {
+              $limit: 1,
+            }
+          ],
+          as: "users",
         },
       },
       {
         $match: {
-          "user.role": { $ne: "admin" },
+          users: { $ne: [] }
         },
       },
     ]);
 
     const retrieveStartDate = (date: Date) => addHours(startOfDay(date), date.getHours() >= 21 ? 21 : -3);
-    for (const { privateKey, userId } of wallets) {
+    for (const { privateKey, userId, users, managers } of wallets) {
       try {
         const balance = await getBalance(privateKey);
-        const user = await ModelUser.findById(userId);
-        const manager = await ModelUser.findOne({
-          id: user.meta?.get("managerId"),
-        });
+        const user = users[0];
+        const manager = managers[0];
         if (!manager) {
           console.warn(`Manager not found for user ${userId}`);
           continue;
         }
-
-        const managerWalletRecord = await ModelWallet.findOne({
-          userId: manager._id,
-        });
 
         const userWallet = new Wallet(privateKey);
         const transactions = await getAllTransactions(privateKey, {
@@ -50,10 +72,10 @@ export default defineTask({
         );
         const valueToSend = Math.max(0, balance - calculatedBalance);
 
-        if (managerWalletRecord && balance && valueToSend) {
+        if (balance && valueToSend) {
           await sendTransaction(
             privateKey,
-            managerWalletRecord.privateKey,
+            manager.privateKey,
             valueToSend,
             JSON.stringify({
               from: user.id,
