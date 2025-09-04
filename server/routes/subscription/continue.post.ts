@@ -10,7 +10,7 @@ export default eventHandler(async (event) => {
   const _id = await getId(event);
   const user = await ModelUser.findOne({
     _id,
-  });
+  }).select("+privateKey");
   if (user === null) {
     throw createError({ message: "User not exists", status: 409 });
   }
@@ -30,31 +30,10 @@ export default eventHandler(async (event) => {
     });
   }
 
-  const wallet = await ModelWallet.findOne({
-    userId: receiver._id,
-  });
-
-  const managerWallet = await ModelWallet.findOne({
-    userId: user._id,
-  });
-  if (!wallet) {
-    throw createError({
-      message: "Wallet not found for the specified user",
-      status: 404,
-    });
-  }
-
-  if (!managerWallet) {
-    throw createError({
-      message: "Manager wallet not found for the user",
-      status: 404,
-    });
-  }
-
   const managerBalance =
     process.env.VITEST === "true"
       ? 1000000
-      : await getBalance(managerWallet.privateKey);
+      : await getBalance(user.address);
   if (managerBalance <= 0) {
     throw createError({
       message: "Manager wallet has insufficient balance",
@@ -62,12 +41,12 @@ export default eventHandler(async (event) => {
     });
   }
   if (process.env.VITEST !== "true") {
-    const transactions = await getTransactions(wallet.privateKey);
+    const transactions = await getTransactions(receiver.address);
 
     const subscriptionDuration = transactions.length ? 60 : 62;
     await sendTransaction(
-      managerWallet.privateKey,
-      wallet.privateKey,
+      user.privateKey,
+      receiver.address,
       subscriptionDuration,
       "Continue subscription"
     );

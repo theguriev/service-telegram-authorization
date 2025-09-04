@@ -140,7 +140,7 @@
             }
           },
           "404": {
-            "description": "Wallet not found",
+            "description": "User not found",
             "content": {
               "application/json": {
                 "schema": {
@@ -281,7 +281,7 @@
             }
           },
           "404": {
-            "description": "Wallet not found",
+            "description": "User not found",
             "content": {
               "application/json": {
                 "schema": {

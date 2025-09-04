@@ -8,29 +8,16 @@ export default defineTask({
   },
   async run() {
     const { notificationBase } = useRuntimeConfig();
-    const result = await ModelUser.aggregate([
+    const result = await ModelUser.aggregate<{
+      users: InferSchemaType<typeof schemaUser>[] & {
+        _id: Types.ObjectId;
+      },
+      managerId: number,
+    }>([
       {
         $match: {
           'meta.managerId': { $exists: true, $ne: null },
           'role': { $nin: ['admin'] },
-        },
-      },
-      {
-        $lookup: {
-          from: 'wallets',
-          localField: "_id",
-          foreignField: "userId",
-          pipeline: [
-            {
-              $limit: 1
-            }
-          ],
-          as: 'wallets',
-        },
-      },
-      {
-        $match: {
-          wallets: { $size: 1 },
         },
       },
       {
@@ -48,29 +35,14 @@ export default defineTask({
       },
     ]);
 
+    const balances = await getBalance(result.flatMap(({ users }) => users.map(user => user.address)));
     for (const { managerId, users } of result) {
-      const usersWithBalancesAsync = users.map(async (user:
-        InferSchemaType<typeof schemaUser> &
-        {
-          _id: Types.ObjectId,
-          wallets: InferSchemaType<typeof schemaWallet>[]
-        }
-      ) => {
-        try {
-          return {
-            user,
-            balance: await getBalance(user.wallets[0].privateKey)
-          };
-        } catch (error) {
-          console.error(`Error getting balance for user ${user._id}:`, error);
-        }
-      });
-      const usersWithBalances = await Promise.all(usersWithBalancesAsync);
       const message = md`Користувачі, у яких закінчується підписка:`;
 
-      const userLinks = usersWithBalances
-        .filter((user) => user && user.balance <= 7)
-        .map(({ user, balance }) => {
+      const userLinks = users
+        .filter((user) => balances[user.address] <= 7)
+        .map((user) => {
+          const balance = balances[user.address];
           const name = `${user.firstName} ${user.lastName}`.trim();
           return {
             text: `${name} (залишилось днів: ${balance})`,

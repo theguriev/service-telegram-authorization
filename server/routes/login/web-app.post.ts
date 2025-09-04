@@ -70,18 +70,6 @@ export default eventHandler(async (event) => {
     });
     save();
 
-    const walletRecord = await ModelWallet.create({
-      privateKey: wallet.privateKey,
-      userId: userSaved._id,
-    });
-
-    if (walletRecord === null) {
-      throw createError({
-        message: "Failed to create wallet for the user.",
-        status: 500,
-      });
-    }
-
     return userDocument;
   }
   const _id = userRecord._id.toString();

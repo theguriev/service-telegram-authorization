@@ -1,4 +1,3 @@
-import { Types } from "mongoose";
 
 const querySchema = z.object({
   order: z.enum(["asc", "desc"]).default("asc"),
@@ -15,11 +14,11 @@ export default eventHandler(async (event) => {
     querySchema.parse
   );
 
-  const walletModel = await ModelWallet.findOne({ userId: new Types.ObjectId(String(_id)) });
-  if (!walletModel) {
-    throw createError({ message: "Wallet not found", status: 404 });
+  const user = await ModelUser.findById(_id);
+  if (!user) {
+    throw createError({ message: "User not found", status: 404 });
   }
-  const transactions = process.env.VITEST === "true" ? [] : await getTransactions(walletModel.privateKey, validated);
+  const transactions = process.env.VITEST === "true" ? [] : await getTransactions(user.address, validated);
 
   return transactions;
 });
