@@ -36,9 +36,10 @@ export default defineTask({
     ]);
 
     const retrieveStartDate = (date: Date) => addHours(startOfDay(date), date.getHours() >= 21 ? 21 : -3);
+    const balances = await getBalance(users.map(user => user.address));
     for (const { _id, id, address, privateKey, managers, meta } of users) {
       try {
-        const balance = await getBalance(address);
+        const balance = balances[address];
         const manager = managers[0];
         if (!manager) {
           console.warn(`Manager not found for user ${_id}`);

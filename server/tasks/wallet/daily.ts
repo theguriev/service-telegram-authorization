@@ -11,9 +11,12 @@ export default defineTask({
     const users = await ModelUser.find({
       role: { $ne: "admin" },
     });
+
+    const balances = await getBalance(users.map(user => user.address));
+    console.log(balances);
     for (const { _id, id, address, firstName, lastName } of users) {
       try {
-        const balance = await getBalance(address);
+        const balance = balances[address];
         if (balance) {
           if ([7, 5, 3, 1].includes(balance - 1)) {
             const name = [firstName, lastName]
