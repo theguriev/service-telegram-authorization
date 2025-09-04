@@ -14,21 +14,26 @@ export default defineTask({
           from: "users",
           localField: "userId",
           foreignField: "_id",
-          as: "user",
+          pipeline: [
+            {
+              $limit: 1,
+            }
+          ],
+          as: "users",
         },
       },
       {
         $match: {
-          "user.role": { $ne: "admin" },
+          "users.role": { $ne: "admin" },
         },
       },
     ]);
-    for (const { privateKey, userId } of wallets) {
+    for (const { privateKey, userId, users } of wallets) {
       try {
         const balance = await getBalance(privateKey);
         if (balance) {
           if ([7, 5, 3, 1].includes(balance - 1)) {
-            const user = await ModelUser.findById(userId);
+            const user = users[0];
             const name = [user.firstName, user.lastName]
               .filter(Boolean)
               .join(" ");

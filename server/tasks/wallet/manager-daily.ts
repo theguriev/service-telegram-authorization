@@ -18,17 +18,12 @@ export default defineTask({
       {
         $lookup: {
           from: 'wallets',
-          let: { userId: '$_id' },
+          localField: "_id",
+          foreignField: "userId",
           pipeline: [
             {
-              $match: {
-                $expr: {
-                  $and: [
-                    { $eq: ['$userId', '$$userId'] },
-                  ],
-                },
-              },
-            },
+              $limit: 1
+            }
           ],
           as: 'wallets',
         },
