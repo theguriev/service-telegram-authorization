@@ -1,9 +1,7 @@
-import { Wallet } from "ethers";
 import { bllsBase } from "~~/constants";
 
-const getBalance = async (privateKey: string) => {
-  const wallet = new Wallet(privateKey);
-  const { nka } = await $fetch<{ nka?: number }>(`/billing/ballance/${wallet.address}`, {
+const getBalance = async (address: string) => {
+  const { nka } = await $fetch<{ nka?: number }>(`/billing/ballance/${address}`, {
     baseURL: bllsBase,
     retry: 5,
     retryDelay: 1000,

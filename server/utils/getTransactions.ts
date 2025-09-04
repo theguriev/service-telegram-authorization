@@ -1,13 +1,11 @@
-import { Wallet } from "ethers";
 import { bllsBase } from "~~/constants";
 
-const getTransactions = async (privateKey: string, options: {
+const getTransactions = async (address: string, options: {
   limit?: number;
   offset?: number;
   order?: 'asc' | 'desc';
   orderBy?: '_id' | 'from' | 'to' | 'symbol' | 'timestamp' | 'message' | 'value';
 } = {}) => {
-  const wallet = new Wallet(privateKey);
   return await $fetch<{
       _id: string;
       from: string;
@@ -19,7 +17,7 @@ const getTransactions = async (privateKey: string, options: {
     }[]>(`/billing/transactions`, {
       baseURL: bllsBase,
       query: {
-        address: wallet.address,
+        address: address,
         symbol: 'nka',
         ...options,
       },

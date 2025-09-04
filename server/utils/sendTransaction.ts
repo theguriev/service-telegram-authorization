@@ -1,13 +1,11 @@
-import { Wallet } from "ethers";
 import { bllsBase } from "~~/constants";
 
-const sendTransaction = async (fromPrivateKey: string, toPrivateKey: string, value: number, message?: string) => {
+const sendTransaction = async (fromPrivateKey: string, address: string, value: number, message?: string) => {
   const fromWallet = new Wallet(fromPrivateKey);
-  const toWallet = new Wallet(toPrivateKey);
 
   const transaction = {
     from: fromWallet.address,
-    to: toWallet.address,
+    to: address,
     value,
     symbol: 'nka',
   };

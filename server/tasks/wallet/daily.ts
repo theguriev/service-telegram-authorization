@@ -8,33 +8,15 @@ export default defineTask({
   },
   async run() {
     const { notificationBase } = useRuntimeConfig();
-    const wallets = await ModelWallet.aggregate([
-      {
-        $lookup: {
-          from: "users",
-          localField: "userId",
-          foreignField: "_id",
-          pipeline: [
-            {
-              $limit: 1,
-            }
-          ],
-          as: "users",
-        },
-      },
-      {
-        $match: {
-          "users.role": { $ne: "admin" },
-        },
-      },
-    ]);
-    for (const { privateKey, userId, users } of wallets) {
+    const users = await ModelUser.find({
+      role: { $ne: "admin" },
+    });
+    for (const { _id, id, address, firstName, lastName } of users) {
       try {
-        const balance = await getBalance(privateKey);
+        const balance = await getBalance(address);
         if (balance) {
           if ([7, 5, 3, 1].includes(balance - 1)) {
-            const user = users[0];
-            const name = [user.firstName, user.lastName]
+            const name = [firstName, lastName]
               .filter(Boolean)
               .join(" ");
             const days = plural(balance - 1, "%d день", "%d дні", "%d днів");
@@ -42,13 +24,13 @@ export default defineTask({
             await sendNotification(
               notificationBase,
               md`*Підписка* \- ${message}`,
-              user.id
+              id
             );
           }
         }
       } catch (error) {
         console.error(
-          `Error processing notification for user ${userId}:`,
+          `Error processing notification for user ${_id}:`,
           error
         );
       }

@@ -259,11 +259,8 @@ const getUsers = async (userId: string, event: H3Event<EventHandlerRequest>, val
   }
 
   const asyncTransformedData = data.map(async (item) => {
-    const wallet = await ModelWallet.findOne({
-      userId: item._id,
-    });
-    const balance = await getBalance(wallet.privateKey);
-    const transaction = await getTransactions(wallet.privateKey, { limit: 1 });
+    const balance = await getBalance(item.address);
+    const transaction = await getTransactions(item.address, { limit: 1 });
     return {
       ...item,
       balance,

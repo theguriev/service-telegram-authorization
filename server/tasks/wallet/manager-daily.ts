@@ -16,24 +16,6 @@ export default defineTask({
         },
       },
       {
-        $lookup: {
-          from: 'wallets',
-          localField: "_id",
-          foreignField: "userId",
-          pipeline: [
-            {
-              $limit: 1
-            }
-          ],
-          as: 'wallets',
-        },
-      },
-      {
-        $match: {
-          wallets: { $size: 1 },
-        },
-      },
-      {
         $group: {
           _id: '$meta.managerId',
           users: { $push: '$$ROOT' },
@@ -53,13 +35,12 @@ export default defineTask({
         InferSchemaType<typeof schemaUser> &
         {
           _id: Types.ObjectId,
-          wallets: InferSchemaType<typeof schemaWallet>[]
         }
       ) => {
         try {
           return {
             user,
-            balance: await getBalance(user.wallets[0].privateKey)
+            balance: await getBalance(user.address)
           };
         } catch (error) {
           console.error(`Error getting balance for user ${user._id}:`, error);
