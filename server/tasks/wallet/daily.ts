@@ -13,7 +13,6 @@ export default defineTask({
     });
 
     const balances = await getBalance(users.map(user => user.address));
-    console.log(balances);
     for (const { _id, id, address, firstName, lastName } of users) {
       try {
         const balance = balances[address];
