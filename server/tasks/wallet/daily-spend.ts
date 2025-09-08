@@ -8,10 +8,7 @@ export default defineTask({
   async run() {
     const users = await ModelUser.aggregate([
       {
-        $match: {
-          role: { $ne: "admin" },
-          ...matchCan("wallet:daily-spend")
-        },
+        $match: matchCan("wallet:daily-spend"),
       },
       {
         $lookup: {
