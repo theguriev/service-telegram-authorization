@@ -58,6 +58,7 @@ export default eventHandler(async (event) => {
       username,
       privateKey: wallet.privateKey,
       address: wallet.address,
+      permissions: [],
       meta: {},
     });
     const userSaved = await userDocument.save();

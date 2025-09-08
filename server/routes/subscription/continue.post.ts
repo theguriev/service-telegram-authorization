@@ -23,7 +23,10 @@ export default eventHandler(async (event) => {
   if (!receiver) {
     throw createError({ message: "Receiver not found", status: 404 });
   }
-  if (receiver.meta?.get("managerId") !== user.id && user.role !== "admin") {
+  if (!(
+    can(user, "continue-all-users-subscription") ||
+    receiver.meta?.get("managerId") === user.id && can(user, "continue-managed-users-subscription")
+  )) {
     throw createError({
       message: "You are not authorized to access this resource",
       status: 403,

@@ -10,9 +10,13 @@ export default eventHandler(async (event) => {
     throw createError({ message: "Unauthorized", status: 401 });
   }
 
-  const admin = await ModelUser.findById(initialId);
-  if (!admin || admin.role !== "admin") {
-    throw createError({ message: "Forbidden: Not an admin", status: 403 });
+  const manager = await ModelUser.findById(initialId);
+  if (!manager) {
+    throw createError({ message: "Initial user not found", status: 404 });
+  }
+
+  if (!can(manager, "switch-user")) {
+    throw createError({ message: "Forbidden: can't switch user", status: 403 });
   }
 
   if (!userId) {
@@ -33,7 +37,7 @@ export default eventHandler(async (event) => {
     const usersAfterId = users.slice(userIndex);
 
     const switchInfo = await ModelSwitchInfo.create({
-      userId: admin._id.toString(),
+      userId: manager._id.toString(),
       users: usersAfterId.map((user) => user._id.toString()),
       usersRequest: new Map(Object.entries(usersRequest))
     });
@@ -42,7 +46,7 @@ export default eventHandler(async (event) => {
       event,
       userId,
       id: initialId,
-      role: "admin",
+      role: manager.role || "user",
       switchInfo: {
         id: switchInfo._id.toString(),
         index: 1,
@@ -56,7 +60,7 @@ export default eventHandler(async (event) => {
       event,
       userId,
       id: initialId,
-      role: "admin",
+      role: manager.role || "user",
     });
     await deleteByUserId();
     await save();
