@@ -25,11 +25,7 @@ export default eventHandler(async (event) => {
     throw createError({ message: "You are not authorized to access this resource", status: 403 });
   }
 
-  const walletModel = await ModelWallet.findOne({ userId: owner._id });
-  if (!walletModel) {
-    throw createError({ message: "Wallet not found", status: 404 });
-  }
-  const balance = process.env.VITEST === "true" ? 0 : await getBalance(walletModel.privateKey);
+  const balance = process.env.VITEST === "true" ? 0 : await getBalance(owner.address);
 
   return { balance };
 });

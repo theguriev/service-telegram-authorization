@@ -21,11 +21,6 @@ export default defineConfig({
         },
         {
           name: "default",
-          as: "ModelWallet",
-          from: "./db/model/wallet.ts",
-        },
-        {
-          name: "default",
           as: "schemaToken",
           from: "./db/schema/token.ts",
         },
@@ -33,11 +28,6 @@ export default defineConfig({
           name: "default",
           as: "schemaUser",
           from: "./db/schema/user.ts",
-        },
-        {
-          name: "default",
-          as: "schemaWallet",
-          from: "./db/schema/wallet.ts",
         },
       ],
       dirs: ["./server/utils"],

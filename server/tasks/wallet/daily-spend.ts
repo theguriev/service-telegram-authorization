@@ -6,65 +6,70 @@ export default defineTask({
     description: "Daily wallet funding",
   },
   async run() {
-    const wallets = await ModelWallet.aggregate([
+    const users = await ModelUser.aggregate([
+      {
+        $match: {
+          role: { $ne: "admin" },
+          ...matchCan("wallet:daily-spend")
+        },
+      },
       {
         $lookup: {
-          from: "users",
-          localField: "userId",
-          foreignField: "_id",
-          as: "user",
+          from: 'users',
+          localField: "meta.managerId",
+          foreignField: "id",
+          pipeline: [
+            {
+              $limit: 1
+            }
+          ],
+          as: 'managers',
         },
       },
       {
         $match: {
-          user: {
-            $elemMatch: matchCan("wallet:daily-spend"),
-          },
-        },
+          managers: { $ne: [] }
+        }
       },
+      {
+        $limit: 1,
+      }
     ]);
 
     const retrieveStartDate = (date: Date) => addHours(startOfDay(date), date.getHours() >= 21 ? 21 : -3);
-    for (const { privateKey, userId } of wallets) {
+    const balances = await getBalance(users.map(user => user.address));
+    for (const { _id, id, address, privateKey, managers, meta } of users) {
       try {
-        const balance = await getBalance(privateKey);
-        const user = await ModelUser.findById(userId);
-        const manager = await ModelUser.findOne({
-          id: user.meta?.get("managerId"),
-        });
+        const balance = balances[address];
+        const manager = managers[0];
         if (!manager) {
-          console.warn(`Manager not found for user ${userId}`);
+          console.warn(`Manager not found for user ${_id}`);
           continue;
         }
 
-        const managerWalletRecord = await ModelWallet.findOne({
-          userId: manager._id,
-        });
-
-        const userWallet = new Wallet(privateKey);
-        const transactions = await getAllTransactions(privateKey, {
+        const transactions = await getAllTransactions(address, {
           order: "asc",
         });
         const calculatedBalance = calculateCurrentBalance(
-          userWallet.address,
+          address,
           transactions,
           retrieveStartDate
         );
         const valueToSend = Math.max(0, balance - calculatedBalance);
 
-        if (managerWalletRecord && balance && valueToSend) {
+        if (balance && valueToSend) {
           await sendTransaction(
             privateKey,
-            managerWalletRecord.privateKey,
+            manager.privateKey,
             valueToSend,
             JSON.stringify({
-              from: user.id,
-              to: user.meta?.get("managerId"),
+              from: id,
+              to: meta?.get("managerId"),
             })
           );
         }
       } catch (error) {
-        console.error(`Error processing wallet for user ${userId}:`, error);
+        console.error(`Error processing wallet for user ${_id}:`, error);
       }
     }
     return { result: "Success" };
