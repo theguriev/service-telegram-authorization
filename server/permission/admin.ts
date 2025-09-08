@@ -1,5 +1,5 @@
 export default [
-  ...permissionManager,
+  ...permissionTemplateManager,
   "get-all-users",
   "get-all-users-balance",
   "continue-all-users-subscription",
