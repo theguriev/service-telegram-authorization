@@ -258,12 +258,10 @@ const getUsers = async (userId: string, event: H3Event<EventHandlerRequest>, val
     return withOffsets ? data.slice(offset, offset + limit) : data;
   }
 
+  const balances = await getBalance(data.map(user => user.address));
   const asyncTransformedData = data.map(async (item) => {
-    const wallet = await ModelWallet.findOne({
-      userId: item._id,
-    });
-    const balance = await getBalance(wallet.privateKey);
-    const transaction = await getTransactions(wallet.privateKey, { limit: 1 });
+    const balance = balances[item.address];
+    const transaction = await getTransactions(item.address, { limit: 1 });
     return {
       ...item,
       balance,
