@@ -4,11 +4,11 @@ import { MongoMemoryServer } from "mongodb-memory-server";
 import mongoose from "mongoose";
 import type { Nitro } from "nitropack";
 import {
-  build,
-  copyPublicAssets,
-  createNitro,
-  prepare,
-  prerender,
+    build,
+    copyPublicAssets,
+    createNitro,
+    prepare,
+    prerender,
 } from "nitropack";
 import { promises as fsp } from "node:fs";
 import { tmpdir } from "node:os";
@@ -51,6 +51,7 @@ const ctx: Context = {
     NITRO_WALLET_PRIVATE_KEY:
       "0x9383e92c466fa0da64f1892d3b761172641296543d4765128446009885268f95",
     NITRO_NOTIFICATION_BASE: "http://localhost:4000",
+    NITRO_CURRENCY_SYMBOL: "nka",
     CUSTOM_HELLO_THERE: "general",
     SECRET: "gurievcreative",
     PORT: "4000",

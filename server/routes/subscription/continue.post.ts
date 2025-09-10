@@ -6,7 +6,7 @@ const requestBodySchema = z.object({
 });
 
 export default eventHandler(async (event) => {
-  const { notificationBase } = useRuntimeConfig();
+  const { notificationBase, currencySymbol } = useRuntimeConfig();
   const _id = await getId(event);
   const user = await ModelUser.findOne({
     _id,
@@ -33,7 +33,7 @@ export default eventHandler(async (event) => {
   const managerBalance =
     process.env.VITEST === "true"
       ? 1000000
-      : await getBalance(user.address);
+      : await getBalance(user.address, currencySymbol);
   if (managerBalance <= 0) {
     throw createError({
       message: "Manager wallet has insufficient balance",
@@ -41,10 +41,11 @@ export default eventHandler(async (event) => {
     });
   }
   if (process.env.VITEST !== "true") {
-    const transactions = await getTransactions(receiver.address);
+    const transactions = await getTransactions(receiver.address, currencySymbol);
 
     const subscriptionDuration = transactions.length ? 60 : 62;
     await sendTransaction(
+      currencySymbol,
       user.privateKey,
       receiver.address,
       subscriptionDuration,

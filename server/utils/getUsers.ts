@@ -207,7 +207,7 @@ const queries: Record<string, QueryFunc> = {
   }),
 };
 
-const getUsers = async (userId: string, event: H3Event<EventHandlerRequest>, validated: z.infer<typeof usersRequestSchema>, withOffsets: boolean = true) => {
+const getUsers = async (currencySymbol: string, userId: string, event: H3Event<EventHandlerRequest>, validated: z.infer<typeof usersRequestSchema>, withOffsets: boolean = true) => {
   const role = await getUserRole(event);
   const initialId = await getId(event);
 
@@ -258,10 +258,10 @@ const getUsers = async (userId: string, event: H3Event<EventHandlerRequest>, val
     return withOffsets ? data.slice(offset, offset + limit) : data;
   }
 
-  const balances = await getBalance(data.map(user => user.address));
+  const balances = await getBalance(data.map(user => user.address), currencySymbol);
   const asyncTransformedData = data.map(async (item) => {
     const balance = balances[item.address];
-    const transaction = await getTransactions(item.address, { limit: 1 });
+    const transaction = await getTransactions(item.address, currencySymbol, { limit: 1 });
     return {
       ...item,
       balance,
