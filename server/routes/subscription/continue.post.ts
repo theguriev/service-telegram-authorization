@@ -53,11 +53,15 @@ export default eventHandler(async (event) => {
     );
 
     const days = plural(subscriptionDuration, "%d день", "%d дні", "%d днів");
-    await sendNotification(
-      notificationBase,
-      md`*Вам була надана підписка на ${days}*`,
-      receiver.id
-    );
+    try {
+      await sendNotification(
+        notificationBase,
+        md`*Вам була надана підписка на ${days}*`,
+        receiver.id
+      );
+    } catch (error) {
+      console.error(`Error sending notification after subscription continuation for user ${receiver._id}:`, error);
+    }
   }
 
   return {
