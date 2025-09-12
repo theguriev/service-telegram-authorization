@@ -7,12 +7,12 @@ export default defineTask({
     description: "Daily wallet funding",
   },
   async run() {
-    const { notificationBase } = useRuntimeConfig();
+    const { notificationBase, currencySymbol } = useRuntimeConfig();
     const users = await ModelUser.find({
       role: { $ne: "admin" },
     });
 
-    const balances = await getBalance(users.map(user => user.address));
+    const balances = await getBalance(users.map(user => user.address), currencySymbol);
     for (const { _id, id, address, firstName, lastName } of users) {
       try {
         const balance = balances[address];

@@ -16,17 +16,17 @@ interface BalancesResponse<T extends string = string> {
   }
 };
 
-export default async function getBalance(address: string): Promise<number>;
-export default async function getBalance<const T extends string>(addresses: T[]): Promise<Record<T, number>>;
+export default async function getBalance(address: string, currencySymbol: string): Promise<number>;
+export default async function getBalance<const T extends string>(addresses: T[], currencySymbol: string): Promise<Record<T, number>>;
 
-export default async function getBalance<const T extends string>(address: string | T[]) {
+export default async function getBalance<const T extends string>(address: string | T[], currencySymbol: string) {
   if (isString(address)) {
-    const { nka } = await $fetch<{ nka?: number }>(`/billing/ballance/${address}`, {
+    const balance = await $fetch<Record<string, number | undefined>>(`/billing/ballance/${address}`, {
       baseURL: bllsBase,
       retry: 5,
       retryDelay: 1000,
     });
-    return nka ?? 0;
+    return balance?.[currencySymbol] ?? 0;
   }
 
   const limit = 100;
@@ -46,7 +46,7 @@ export default async function getBalance<const T extends string>(address: string
     });
     return Object.values(results).reduce<Record<T, number>>((acc, { address, ballanceBySymbol }) => ({
       ...acc,
-      [address]: ballanceBySymbol?.nka ?? 0,
+      [address]: ballanceBySymbol?.[currencySymbol] ?? 0,
     }), {} as Record<T, number>);
   });
   const balances = await Promise.all(asyncBalances);

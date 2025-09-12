@@ -7,6 +7,7 @@ const querySchema = z.object({
 });
 
 export default eventHandler(async (event) => {
+  const { currencySymbol } = useRuntimeConfig();
   const _id = await getUserId(event);
   const query = getQuery(event);
   const validated = await zodValidateData(
@@ -18,7 +19,7 @@ export default eventHandler(async (event) => {
   if (!user) {
     throw createError({ message: "User not found", status: 404 });
   }
-  const transactions = process.env.VITEST === "true" ? [] : await getTransactions(user.address, validated);
+  const transactions = process.env.VITEST === "true" ? [] : await getTransactions(user.address, currencySymbol, validated);
 
   return transactions;
 });

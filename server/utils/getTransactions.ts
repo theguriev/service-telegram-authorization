@@ -1,6 +1,6 @@
 import { bllsBase } from "~~/constants";
 
-const getTransactions = async (address: string, options: {
+const getTransactions = async (address: string, currencySymbol: string, options: {
   limit?: number;
   offset?: number;
   order?: 'asc' | 'desc';
@@ -18,7 +18,7 @@ const getTransactions = async (address: string, options: {
       baseURL: bllsBase,
       query: {
         address: address,
-        symbol: 'nka',
+        symbol: currencySymbol,
         ...options,
       },
       retry: 5,
