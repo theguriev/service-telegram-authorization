@@ -35,7 +35,7 @@ export default defineTask({
 
     const retrieveStartDate = (date: Date) => addHours(startOfDay(date), date.getHours() >= 21 ? 21 : -3);
     const balances = await getBalance(users.map(user => user.address), currencySymbol);
-    for (const { _id, id, address, privateKey, managers, meta } of users) {
+    for (const { _id, id, address, privateKey, managers } of users) {
       try {
         const balance = balances[address];
         const manager = managers[0];
@@ -62,7 +62,7 @@ export default defineTask({
             valueToSend,
             JSON.stringify({
               from: id,
-              to: meta?.get("managerId"),
+              to: manager.id,
             })
           );
         }
