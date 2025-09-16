@@ -58,7 +58,7 @@ export default defineTask({
           await sendTransaction(
             currencySymbol,
             privateKey,
-            manager.privateKey,
+            manager.address,
             valueToSend,
             JSON.stringify({
               from: id,
