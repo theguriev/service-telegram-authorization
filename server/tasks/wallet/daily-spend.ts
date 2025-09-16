@@ -30,9 +30,6 @@ export default defineTask({
         $match: {
           managers: { $ne: [] }
         }
-      },
-      {
-        $limit: 1,
       }
     ]);
 
