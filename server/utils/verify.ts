@@ -1,9 +1,7 @@
-/* eslint-disable import/default */
-import jwt from 'jsonwebtoken'
+import jwt, { VerifyOptions } from 'jsonwebtoken';
 
-const verify = (token: string, secret:string) => new Promise<jwt.JwtPayload>((resolve, reject) => {
-  // eslint-disable-next-line import/no-named-as-default-member
-  jwt.verify(token, secret, (err, decoded) => {
+const verify = (token: string, secret:string, options?: VerifyOptions) => new Promise<jwt.JwtPayload>((resolve, reject) => {
+  jwt.verify(token, secret, options, (err, decoded) => {
     if (err) {
       reject(err)
     }

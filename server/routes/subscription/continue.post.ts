@@ -6,6 +6,7 @@ const requestBodySchema = z.object({
 });
 
 export default eventHandler(async (event) => {
+  const logger = await getLogger(event);
   const { notificationBase, currencySymbol } = useRuntimeConfig();
   const _id = await getId(event);
   const user = await ModelUser.findOne({
@@ -60,7 +61,7 @@ export default eventHandler(async (event) => {
         receiver.id
       );
     } catch (error) {
-      console.error(`Error sending notification after subscription continuation for user ${receiver._id}:`, error);
+      logger.error({ message: `Error sending notification after subscription continuation for user ${receiver._id}`, error });
     }
   }
 
