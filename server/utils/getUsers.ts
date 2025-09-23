@@ -28,10 +28,10 @@ type QueryFunc = (
 ) => PipelineStage | PipelineStage[] | Promise<PipelineStage | PipelineStage[]>;
 
 const getStartDate = (date: Date) => {
-  const startDate = startOfDay(date);
-  const zonedDate = toZonedTime(date, "Europe/Kyiv");
+  const zonedDate = new Date(toZonedTime(date, "Europe/Kyiv").getTime() - dateDifference.valueOf());
+  const startDate = startOfDay(zonedDate);
   const difference = date.getTime() - zonedDate.getTime();
-  return new Date(startDate.getTime() + dateDifference.valueOf() + difference);
+  return new Date(startDate.getTime() + difference);
 };
 
 const queries: Record<string, QueryFunc> = {
