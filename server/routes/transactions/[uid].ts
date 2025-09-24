@@ -8,6 +8,7 @@ const querySchema = z.object({
 const userIdSchema = z.string().nonempty();
 
 export default eventHandler(async (event) => {
+  const { currencySymbol } = useRuntimeConfig();
   const _id = await getId(event);
   const query = getQuery(event);
   const validated = await zodValidateData(
@@ -38,7 +39,7 @@ export default eventHandler(async (event) => {
     throw createError({ message: "You are not authorized to access this resource", status: 403 });
   }
 
-  const transactions = process.env.VITEST === "true" ? [] : await getTransactions(owner.address, validated);
+  const transactions = process.env.VITEST === "true" ? [] : await getTransactions(owner.address, currencySymbol, validated);
 
   return transactions;
 });

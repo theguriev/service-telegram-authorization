@@ -6,6 +6,7 @@ export default defineTask({
     description: "Daily wallet funding",
   },
   async run() {
+    const { currencySymbol } = useRuntimeConfig();
     const users = await ModelUser.aggregate([
       {
         $match: matchCan("wallet:daily-spend"),
@@ -27,15 +28,12 @@ export default defineTask({
         $match: {
           managers: { $ne: [] }
         }
-      },
-      {
-        $limit: 1,
       }
     ]);
 
     const retrieveStartDate = (date: Date) => addHours(startOfDay(date), date.getHours() >= 21 ? 21 : -3);
-    const balances = await getBalance(users.map(user => user.address));
-    for (const { _id, id, address, privateKey, managers, meta } of users) {
+    const balances = await getBalance(users.map(user => user.address), currencySymbol);
+    for (const { _id, id, address, privateKey, managers } of users) {
       try {
         const balance = balances[address];
         const manager = managers[0];
@@ -44,7 +42,7 @@ export default defineTask({
           continue;
         }
 
-        const transactions = await getAllTransactions(address, {
+        const transactions = await getAllTransactions(address, currencySymbol, {
           order: "asc",
         });
         const calculatedBalance = calculateCurrentBalance(
@@ -56,12 +54,13 @@ export default defineTask({
 
         if (balance && valueToSend) {
           await sendTransaction(
+            currencySymbol,
             privateKey,
-            manager.privateKey,
+            manager.address,
             valueToSend,
             JSON.stringify({
               from: id,
-              to: meta?.get("managerId"),
+              to: manager.id,
             })
           );
         }

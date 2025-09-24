@@ -7,7 +7,7 @@ export default defineTask({
     description: "Daily task to notify managers about users with expiring subscriptions",
   },
   async run() {
-    const { notificationBase } = useRuntimeConfig();
+    const { notificationBase, currencySymbol } = useRuntimeConfig();
     const result = await ModelUser.aggregate<{
       users: InferSchemaType<typeof schemaUser>[] & {
         _id: Types.ObjectId;
@@ -35,7 +35,7 @@ export default defineTask({
       },
     ]);
 
-    const balances = await getBalance(result.flatMap(({ users }) => users.map(user => user.address)));
+    const balances = await getBalance(result.flatMap(({ users }) => users.map(user => user.address)), currencySymbol);
     for (const { managerId, users } of result) {
       const message = md`Користувачі, у яких закінчується підписка:`;
 

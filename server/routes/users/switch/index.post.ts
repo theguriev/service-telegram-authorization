@@ -4,6 +4,7 @@ const requestBodySchema = z.object({
 });
 
 export default eventHandler(async (event) => {
+  const { currencySymbol } = useRuntimeConfig();
   const { id: userId, usersRequest } = await zodValidateBody(event, requestBodySchema.parse);
   const initialId = await getId(event);
   if (!initialId) {
@@ -29,7 +30,7 @@ export default eventHandler(async (event) => {
   }
 
   if (usersRequest && userId !== initialId) {
-    const users = await getUsers(initialId, event, usersRequest, false);
+    const users = await getUsers(currencySymbol, initialId, event, usersRequest, false);
     const userIndex = users.findIndex((user) => user._id.toString() === userId);
     if (userIndex === -1) {
       throw createError({ message: "User not found", status: 404 });

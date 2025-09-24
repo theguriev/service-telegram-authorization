@@ -13,6 +13,7 @@ export default defineNitroConfig({
     secret: "gurievcreative",
     walletPrivateKey: "",
     notificationBase: "http://localhost:4000",
+    currencySymbol: "nka",
   },
   experimental: {
     tasks: true,
