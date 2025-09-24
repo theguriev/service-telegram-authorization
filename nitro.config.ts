@@ -1,6 +1,8 @@
 import { camelCase } from "scule";
 import importsHelper from "./importsHelper";
 
+const GLOB_EXTENSIONS = ".{js,mjs,cjs,ts,mts,cts,tsx,jsx}";
+
 //https://nitro.unjs.io/config
 export default defineNitroConfig({
   srcDir: "server",
@@ -24,11 +26,14 @@ export default defineNitroConfig({
     imports: [
       ...(await importsHelper("./db/model")),
       ...(await importsHelper("./db/schema", camelCase)),
+      ...(await importsHelper("./server/permission", camelCase)),
       { name: "InferSchemaType", from: "mongoose", type: true },
       { name: "parse", from: "set-cookie-parser" },
       { name: "destr", from: "destr" },
       { name: "omit", from: "es-toolkit" },
       { name: "Wallet", from: "ethers" },
+      { name: "can", from: "~/permission" },
+      { name: "matchCan", from: "~/permission" },
     ],
     presets: [
       {

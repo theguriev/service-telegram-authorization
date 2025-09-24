@@ -2,7 +2,7 @@ import { startOfDay, subDays } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
 import type { EventHandlerRequest, H3Event } from "h3";
 import { ObjectId } from "mongodb";
-import { PipelineStage } from "mongoose";
+import { HydratedDocument, InferSchemaType, PipelineStage } from "mongoose";
 import { z } from "zod";
 import { dateDifference, weekends } from "~~/constants";
 
@@ -22,6 +22,7 @@ type FuncParams = z.infer<typeof usersRequestSchema> & {
   managerTelegramId: number;
   managerId: string;
   userId: string;
+  manager: HydratedDocument<InferSchemaType<typeof schemaUser>>;
 };
 type QueryFunc = (
   params: FuncParams
@@ -35,19 +36,24 @@ const getStartDate = (date: Date) => {
 };
 
 const queries: Record<string, QueryFunc> = {
-  getBaseQuery: ({ managerTelegramId, managerId, userId }) => {
-    const baseQuery =
-      userId !== managerId
+  getBaseQuery: ({ managerTelegramId, userId, manager }) => {
+    if (can(manager, "get-all-users")) {
+      return userId === manager._id.toString() ? {
+        $match: {
+          _id: { $ne: manager._id }
+        }
+      } : [];
+    }
+
+    return {
+      $match: userId !== manager._id.toString()
         ? {
             $or: [
               { "meta.managerId": managerTelegramId },
-              { _id: new ObjectId(managerId) },
+              { _id: manager._id },
             ],
           }
-        : { "meta.managerId": managerTelegramId };
-
-    return {
-      $match: baseQuery,
+        : { "meta.managerId": managerTelegramId },
     };
   },
 
@@ -208,16 +214,7 @@ const queries: Record<string, QueryFunc> = {
 };
 
 const getUsers = async (currencySymbol: string, userId: string, event: H3Event<EventHandlerRequest>, validated: z.infer<typeof usersRequestSchema>, withOffsets: boolean = true) => {
-  const role = await getUserRole(event);
   const initialId = await getId(event);
-
-  if (role !== "admin") {
-    throw createError({
-      message: "You are not authorized to perform this action",
-      statusCode: 403,
-    });
-  }
-
   const manager = await ModelUser.findOne({
     _id: new ObjectId(initialId as string),
   });
@@ -229,8 +226,16 @@ const getUsers = async (currencySymbol: string, userId: string, event: H3Event<E
     });
   }
 
+  if (!can(manager, ["get-managed-users", "get-all-users"])) {
+    throw createError({
+      message: "You are not authorized to perform this action",
+      statusCode: 403,
+    });
+  }
+
   const params = {
     ...validated,
+    manager,
     managerId: manager._id.toString(),
     managerTelegramId: manager.id,
     userId: userId.toString(),
