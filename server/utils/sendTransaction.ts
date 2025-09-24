@@ -1,13 +1,13 @@
 import { bllsBase } from "~~/constants";
 
-const sendTransaction = async (fromPrivateKey: string, address: string, value: number, message?: string) => {
+const sendTransaction = async (currencySymbol: string, fromPrivateKey: string, address: string, value: number, message?: string) => {
   const fromWallet = new Wallet(fromPrivateKey);
 
   const transaction = {
     from: fromWallet.address,
     to: address,
     value,
-    symbol: 'nka',
+    symbol: currencySymbol,
   };
 
   const signature = await fromWallet.signMessage(JSON.stringify(transaction));

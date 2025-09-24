@@ -12,10 +12,7 @@ const calculateCurrentBalance = (
     currentBalance: number;
   }>(({ previousTransaction, currentBalance }, transaction) => {
     if (transaction.from === from) {
-      return {
-        previousTransaction: transaction,
-        currentBalance: Math.max(0, currentBalance - transaction.value),
-      };
+      return { previousTransaction, currentBalance };
     }
 
     if (!previousTransaction) {

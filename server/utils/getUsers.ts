@@ -28,10 +28,10 @@ type QueryFunc = (
 ) => PipelineStage | PipelineStage[] | Promise<PipelineStage | PipelineStage[]>;
 
 const getStartDate = (date: Date) => {
-  const startDate = startOfDay(date);
-  const zonedDate = toZonedTime(date, "Europe/Kyiv");
+  const zonedDate = new Date(toZonedTime(date, "Europe/Kyiv").getTime() - dateDifference.valueOf());
+  const startDate = startOfDay(zonedDate);
   const difference = date.getTime() - zonedDate.getTime();
-  return new Date(startDate.getTime() + dateDifference.valueOf() + difference);
+  return new Date(startDate.getTime() + difference);
 };
 
 const queries: Record<string, QueryFunc> = {
@@ -207,7 +207,7 @@ const queries: Record<string, QueryFunc> = {
   }),
 };
 
-const getUsers = async (userId: string, event: H3Event<EventHandlerRequest>, validated: z.infer<typeof usersRequestSchema>, withOffsets: boolean = true) => {
+const getUsers = async (currencySymbol: string, userId: string, event: H3Event<EventHandlerRequest>, validated: z.infer<typeof usersRequestSchema>, withOffsets: boolean = true) => {
   const role = await getUserRole(event);
   const initialId = await getId(event);
 
@@ -258,10 +258,10 @@ const getUsers = async (userId: string, event: H3Event<EventHandlerRequest>, val
     return withOffsets ? data.slice(offset, offset + limit) : data;
   }
 
-  const balances = await getBalance(data.map(user => user.address));
+  const balances = await getBalance(data.map(user => user.address), currencySymbol);
   const asyncTransformedData = data.map(async (item) => {
     const balance = balances[item.address];
-    const transaction = await getTransactions(item.address, { limit: 1 });
+    const transaction = await getTransactions(item.address, currencySymbol, { limit: 1 });
     return {
       ...item,
       balance,
