@@ -52,6 +52,7 @@ const ctx: Context = {
       "0x9383e92c466fa0da64f1892d3b761172641296543d4765128446009885268f95",
     NITRO_NOTIFICATION_BASE: "http://localhost:4000",
     NITRO_CURRENCY_SYMBOL: "nka",
+    NITRO_LOKI_HOST: "http://localhost:3100",
     CUSTOM_HELLO_THERE: "general",
     SECRET: "gurievcreative",
     PORT: "4000",

@@ -1,5 +1,5 @@
 const requestBodySchema = z.object({
-  meta: z.record(z.any()),
+  meta: z.record(z.string(), z.any()),
   userId: z.string().transform(objectIdTransform).optional()
 });
 

@@ -12,6 +12,8 @@ export default defineNitroConfig({
     walletPrivateKey: "",
     notificationBase: "http://localhost:4000",
     currencySymbol: "nka",
+    lokiHost: "http://localhost:3100",
+    lokiBasicAuth: undefined as string | undefined,
   },
   experimental: {
     tasks: true,
@@ -24,10 +26,10 @@ export default defineNitroConfig({
     imports: [
       ...(await importsHelper("./db/model")),
       ...(await importsHelper("./db/schema", camelCase)),
-      { name: "InferSchemaType", from: "mongoose", type: true },
       { name: "parse", from: "set-cookie-parser" },
       { name: "destr", from: "destr" },
       { name: "omit", from: "es-toolkit" },
+      { name: "v4", as: "uuidv4", from: "uuid" },
       { name: "Wallet", from: "ethers" },
     ],
     presets: [
