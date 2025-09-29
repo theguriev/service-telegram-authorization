@@ -5,7 +5,7 @@ import {
     type HTTPHeaderName,
     type HTTPMethod,
 } from "h3";
-import { HydratedDocument } from "mongoose";
+import { HydratedDocument, InferSchemaType } from "mongoose";
 import util from "util";
 import { createLogger, format, transport, transports } from "winston";
 import LokiTransport from "winston-loki";
