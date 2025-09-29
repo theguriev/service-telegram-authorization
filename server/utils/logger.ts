@@ -39,6 +39,7 @@ declare module "logform" {
       rawBody?: string;
       fingerprint?: string;
       formData?: FormData;
+      multipartFormData?: MultiPartData[];
     };
     user?: HydratedDocument<InferSchemaType<typeof schemaUser>>;
     timestamp?: string;
