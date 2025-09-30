@@ -7,9 +7,9 @@ on:
   workflow_dispatch:
     inputs:
       tag_suffix:
-        description: 'Tag suffix (optional)'
+        description: "Tag suffix (optional)"
         required: false
-        default: ''
+        default: ""
         type: string
 
 jobs:
@@ -48,4 +48,4 @@ jobs:
           tags: ${{ steps.tag.outputs.tag }}
 
       - name: Output image tag
-        run: echo "Built and pushed image: ${{ steps.tag.outputs.tag }}"
+        run: 'echo "Built and pushed image: ${{ steps.tag.outputs.tag }}"'
