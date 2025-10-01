@@ -105,11 +105,13 @@ describe.sequential("GET /users API Endpoint", () => {
           expect(Array.isArray(response._data)).toBe(true);
           expect(response._data.length).toBeGreaterThanOrEqual(1);
           response._data.forEach((user: any) => {
-            const fn = user.firstName || "";
-            const ln = user.lastName || "";
+            const { username, firstName, lastName, meta } = user;
             expect(
-              fn.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                ln.toLowerCase().includes(searchTerm.toLowerCase())
+              firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+              lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+              meta?.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+              meta?.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+              username.toLowerCase().includes(searchTerm.toLowerCase())
             ).toBe(true);
           });
         },
@@ -183,7 +185,7 @@ describe.sequential("GET /users API Endpoint", () => {
       });
     });
 
-    it("should NOT return admin user in results when using regular admin token (getUserId() === getId())", async () => {
+    it("should NOT return same user in results when using regular admin token (getUserId() === getId())", async () => {
       await $fetch("/users", {
         baseURL,
         method: "GET",
@@ -194,10 +196,10 @@ describe.sequential("GET /users API Endpoint", () => {
         onResponse: ({ response }) => {
           expect(response.status).toBe(200);
           expect(Array.isArray(response._data)).toBe(true);
-          const hasAdminUser = response._data.some(
-            (user: any) => user.role === "admin"
+          const hasSameUser = response._data.some(
+            (user: any) => user._id === adminId
           );
-          expect(hasAdminUser).toBe(false);
+          expect(hasSameUser).toBe(false);
         },
       });
     });
@@ -593,7 +595,7 @@ describe.sequential("POST /users/switch API Endpoint", () => {
       baseURL,
       method: "POST",
       body: {
-        id: testUserId,
+        id: "000000000000000000000000",
         usersRequest: { }
       },
       headers: {
@@ -717,7 +719,7 @@ describe.sequential("POST /users/switch API Endpoint", () => {
     expect(switchAccessTokenData).toHaveProperty("role", "admin");
     expect(switchAccessTokenData).toHaveProperty("switchInfoId");
     expect(switchAccessTokenData).toHaveProperty("switchInfoIndex", 1);
-    expect(switchAccessTokenData).toHaveProperty("switchInfoLength", 3);
+    expect(switchAccessTokenData).toHaveProperty("switchInfoLength");
   });
 
   it("previous switch should return 200 and admin user if switch info is correct", async () => {
@@ -731,6 +733,7 @@ describe.sequential("POST /users/switch API Endpoint", () => {
     });
 
     expect(response.status).toBe(200);
+    expect(response._data).toHaveProperty("user");
     expect(response._data.user).toHaveProperty("_id", adminId);
     expect(response._data).toHaveProperty("status", "return");
     const setCookie = extractSetCookie(response.headers);
@@ -749,7 +752,7 @@ describe.sequential("POST /users/switch API Endpoint", () => {
     expect(switchAccessTokenData).toHaveProperty("role", "admin");
     expect(switchAccessTokenData).toHaveProperty("switchInfoId");
     expect(switchAccessTokenData).toHaveProperty("switchInfoIndex", 0);
-    expect(switchAccessTokenData).toHaveProperty("switchInfoLength", 3);
+    expect(switchAccessTokenData).toHaveProperty("switchInfoLength");
   });
 
   it("previous switch should return 400 if already switched first user", async () => {
@@ -777,6 +780,7 @@ describe.sequential("POST /users/switch API Endpoint", () => {
     });
 
     expect(response.status).toBe(200);
+    expect(response._data).toHaveProperty("user");
     expect(response._data.user).toHaveProperty("_id", regularId);
     expect(response._data).toHaveProperty("status", "success");
     const setCookie = extractSetCookie(response.headers);
@@ -795,39 +799,54 @@ describe.sequential("POST /users/switch API Endpoint", () => {
     expect(switchAccessTokenData).toHaveProperty("role", "admin");
     expect(switchAccessTokenData).toHaveProperty("switchInfoId");
     expect(switchAccessTokenData).toHaveProperty("switchInfoIndex", 1);
-    expect(switchAccessTokenData).toHaveProperty("switchInfoLength", 3);
+    expect(switchAccessTokenData).toHaveProperty("switchInfoLength");
   });
 
-  it("next switch should return 200 and admin user if switch info is correct", async () => {
+  it("last switch should return 200 and admin user if switch info is correct", async () => {
     if (!testUserId) return;
-    const response = await $fetch.raw("/users/switch/next", {
-      baseURL,
-      method: "POST",
+    let responseData: Awaited<ReturnType<typeof $fetch.raw<unknown, "/users/switch/next", {
+      baseURL: string;
+      method: "POST";
       headers: {
-        Cookie: `accessToken=${switchedAccessToken}`,
-      }
-    });
+        Cookie: string;
+      };
+    }>>>["_data"] | undefined = undefined;
 
-    expect(response.status).toBe(200);
-    expect(response._data.user).toHaveProperty("_id", adminId);
-    expect(response._data).toHaveProperty("status", "return");
-    const setCookie = extractSetCookie(response.headers);
-    const refreshTokenObj = setCookie.find(
-      (cookie) => cookie.name === "refreshToken"
-    );
-    const accessTokenObj = setCookie.find(
-      (cookie) => cookie.name === "accessToken"
-    );
-    expect(refreshTokenObj).toBeDefined();
-    expect(accessTokenObj).toBeDefined();
-    switchedAccessToken = accessTokenObj.value;
-    switchAccessTokenData = await verify(switchedAccessToken, secret);
+    for (let i = 2; i < switchAccessTokenData.switchInfoLength; i++) {
+      const response = await $fetch.raw("/users/switch/next", {
+        baseURL,
+        method: "POST",
+        headers: {
+          Cookie: `accessToken=${switchedAccessToken}`,
+        }
+      });
+      responseData = response._data;
+
+      expect(response.status).toBe(200);
+      expect(response._data).toHaveProperty("status", i === switchAccessTokenData.switchInfoLength - 1
+        ? "return"
+        : "success");
+      const setCookie = extractSetCookie(response.headers);
+      const refreshTokenObj = setCookie.find(
+        (cookie) => cookie.name === "refreshToken"
+      );
+      const accessTokenObj = setCookie.find(
+        (cookie) => cookie.name === "accessToken"
+      );
+      expect(refreshTokenObj).toBeDefined();
+      expect(accessTokenObj).toBeDefined();
+      switchedAccessToken = accessTokenObj.value;
+      switchAccessTokenData = await verify(switchedAccessToken, secret);
+      expect(switchAccessTokenData).toHaveProperty("id", adminId);
+      expect(switchAccessTokenData).toHaveProperty("role", "admin");
+      expect(switchAccessTokenData).toHaveProperty("switchInfoId");
+      expect(switchAccessTokenData).toHaveProperty("switchInfoIndex", i);
+      expect(switchAccessTokenData).toHaveProperty("switchInfoLength");
+    }
+
+    expect(responseData).toHaveProperty("user");
+    expect(responseData.user).toHaveProperty("_id", adminId);
     expect(switchAccessTokenData).toHaveProperty("userId", adminId);
-    expect(switchAccessTokenData).toHaveProperty("id", adminId);
-    expect(switchAccessTokenData).toHaveProperty("role", "admin");
-    expect(switchAccessTokenData).toHaveProperty("switchInfoId");
-    expect(switchAccessTokenData).toHaveProperty("switchInfoIndex", 2);
-    expect(switchAccessTokenData).toHaveProperty("switchInfoLength", 3);
   });
 
   it("next switch should return 400 if already switched last user", async () => {

@@ -69,6 +69,33 @@
         }
       }
     },
+    "/initial": {
+      "get": {
+        "summary": "Get initial user details",
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "User not exists",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/transactions": {
       "get": {
         "tags": ["subscriptions"],
@@ -1095,8 +1122,13 @@
           },
           "role": {
             "type": "string",
-            "enum": ["user", "admin"],
             "description": "User role in the system"
+          },
+          "permissions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           },
           "address": {
             "type": "string",
@@ -1122,7 +1154,8 @@
             },
             "description": "User metadata where keys are strings and values can be strings or numbers."
           }
-        }
+        },
+        "required": ["_id", "id", "firstName", "address", "hash", "permissions", "updatedAt", "createdAt"]
       },
       "UsersRequest": {
         "type": "object",

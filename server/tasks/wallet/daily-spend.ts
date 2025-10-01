@@ -9,9 +9,7 @@ export default defineTask({
     const { currencySymbol } = useRuntimeConfig();
     const users = await ModelUser.aggregate([
       {
-        $match: {
-          role: { $ne: "admin" },
-        },
+        $match: matchCan("wallet:daily-spend"),
       },
       {
         $lookup: {
