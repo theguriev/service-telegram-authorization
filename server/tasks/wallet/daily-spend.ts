@@ -61,7 +61,8 @@ export default defineTask({
             JSON.stringify({
               from: id,
               to: manager.id,
-            })
+            }),
+            `subscription-daily-${uuidv4()}`
           );
         }
       } catch (error) {

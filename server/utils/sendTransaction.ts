@@ -1,6 +1,6 @@
 import { bllsBase } from "~~/constants";
 
-const sendTransaction = async (currencySymbol: string, fromPrivateKey: string, address: string, value: number, message?: string) => {
+const sendTransaction = async (currencySymbol: string, fromPrivateKey: string, address: string, value: number, message?: string, idempotencyKey?: string) => {
   const fromWallet = new Wallet(fromPrivateKey);
 
   const transaction = {
@@ -23,6 +23,7 @@ const sendTransaction = async (currencySymbol: string, fromPrivateKey: string, a
       ...transaction,
       message,
       signature,
+      idempotencyKey,
     }
   });
 };
