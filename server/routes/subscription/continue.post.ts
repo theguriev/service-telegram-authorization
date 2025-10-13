@@ -52,7 +52,8 @@ export default eventHandler(async (event) => {
       user.privateKey,
       receiver.address,
       subscriptionDuration,
-      "Continue subscription"
+      "Continue subscription",
+      `subscription-continue-${uuidv4()}`
     );
 
     const days = plural(subscriptionDuration, "%d день", "%d дні", "%d днів");
