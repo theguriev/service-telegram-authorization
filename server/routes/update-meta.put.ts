@@ -8,7 +8,7 @@ export default eventHandler(async (event) => {
   const managerId = await getId(event);
   const { meta, userId } = await zodValidateBody(event, requestBodySchema.parse);
   const user = await ModelUser.findOne({
-    _id,
+    _id: userId ?? _id,
   });
   if (!user) {
     throw createError({ message: "User not exists!", status: 409 });
@@ -25,20 +25,6 @@ export default eventHandler(async (event) => {
     can(manager, "update-managed-users-meta") && user.meta?.get("managerId") === manager.id
   )) {
     throw createError({ message: "Unauthorized to update target user!", status: 403 });
-  }
-
-  if (userId && userId.toString() !== _id) {
-    const targetUser = await ModelUser.findOne({
-      _id: userId,
-    });
-    if (targetUser === null) {
-      throw createError({ message: "Target user not exists!", status: 409 });
-    }
-
-    targetUser.meta = new Map(Object.entries(meta));
-    await targetUser.save();
-
-    return targetUser;
   }
 
   user.meta = new Map(Object.entries(meta));
