@@ -22,7 +22,7 @@ export default eventHandler(async (event) => {
   if (userId && !(
     userId.toString() === _id ||
     can(manager, "update-all-users-meta") ||
-    can(manager, "update-managed-users-meta") && user.meta?.get("managerId") === managerId
+    can(manager, "update-managed-users-meta") && user.meta?.get("managerId") === manager.id
   )) {
     throw createError({ message: "Unauthorized to update target user!", status: 403 });
   }
