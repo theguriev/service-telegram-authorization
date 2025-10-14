@@ -27,6 +27,7 @@ export default defineNitroConfig({
       ...(await importsHelper("./db/model")),
       ...(await importsHelper("./db/schema", camelCase)),
       ...(await importsHelper("./server/permission", camelCase)),
+      { name: "v4", as: "uuidv4", from: "uuid" },
       { name: "InferSchemaType", from: "mongoose", type: true },
       { name: "parse", from: "set-cookie-parser" },
       { name: "destr", from: "destr" },
