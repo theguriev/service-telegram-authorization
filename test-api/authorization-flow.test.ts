@@ -404,4 +404,125 @@ describe.sequential("Authorization", () => {
       });
     })
   });
+
+  describe("PUT /update-feature-flags", () => {
+    it("updates feature flags", async () => {
+      await $fetch("/update-feature-flags", {
+        baseURL: process.env.API_URL,
+        method: "PUT",
+        headers: {
+          Accept: "application/json",
+          Cookie: `accessToken=${validAccessToken}`,
+        },
+        body: { featureFlags: ["flag1", "flag2"] },
+        onResponse: ({ response }) => {
+          expect(response.status).toBe(200);
+          expect(response._data.featureFlags).toEqual(["flag1", "flag2"]);
+          expect(response._data.privateKey).toBeUndefined();
+          expect(response._data.address).toBeDefined();
+        },
+      });
+    });
+
+    it("validation error on wrong userId", async () => {
+      await $fetch("/update-feature-flags", {
+        baseURL: process.env.API_URL,
+        method: "PUT",
+        headers: {
+          Accept: "application/json",
+          Cookie: `accessToken=${validAccessToken}`,
+        },
+        ignoreResponseError: true,
+        body: {
+          featureFlags: ["flag1", "flag2"],
+          userId: "wrongUserId",
+        },
+        onResponse: ({ response }) => {
+          expect(response.status).toBe(400);
+        },
+      });
+    });
+
+    it("authorization error on user updating other user", async () => {
+      await $fetch("/update-feature-flags", {
+        baseURL: process.env.API_URL,
+        method: "PUT",
+        headers: {
+          Accept: "application/json",
+          Cookie: `accessToken=${validAccessToken}`,
+        },
+        ignoreResponseError: true,
+        body: {
+          featureFlags: ["flag1", "flag2"],
+          userId: regularId,
+        },
+        onResponse: ({ response }) => {
+          expect(response.status).toBe(403);
+        },
+      });
+    });
+
+    it("user not found error on updating non existing user", async () => {
+      await $fetch("/update-feature-flags", {
+        baseURL: process.env.API_URL,
+        method: "PUT",
+        headers: {
+          Accept: "application/json",
+          Cookie: `accessToken=${adminAccessToken}`,
+        },
+        ignoreResponseError: true,
+        body: {
+          featureFlags: ["flag1", "flag2"],
+          userId: "000000000000000000000000",
+        },
+        onResponse: ({ response }) => {
+          expect(response.status).toBe(409);
+        },
+      });
+    });
+
+    it("success on updating existing user by admin", async () => {
+      await $fetch("/update-feature-flags", {
+        baseURL: process.env.API_URL,
+        method: "PUT",
+        headers: {
+          Accept: "application/json",
+          Cookie: `accessToken=${adminAccessToken}`,
+        },
+        body: {
+          featureFlags: ["flag1", "flag2"],
+          userId: validUserId,
+        },
+        onResponse: ({ response }) => {
+          expect(response.status).toBe(200);
+          expect(response._data._id).toBe(validUserId);
+          expect(response._data.featureFlags).toEqual(["flag1", "flag2"]);
+          expect(response._data.privateKey).toBeUndefined();
+          expect(response._data.address).toBeDefined();
+        },
+      });
+    });
+
+    it("success on updating existing user by himself", async () => {
+      await $fetch("/update-feature-flags", {
+        baseURL: process.env.API_URL,
+        method: "PUT",
+        headers: {
+          Accept: "application/json",
+          Cookie: `accessToken=${validAccessToken}`,
+        },
+        body: {
+          featureFlags: ["flag1", "flag2"],
+          userId: validUserId,
+        },
+        onResponse: ({ response }) => {
+          expect(response.status).toBe(200);
+          expect(response._data._id).toBe(validUserId);
+          expect(response._data.featureFlags).toEqual(["flag1", "flag2"]);
+          expect(response._data.privateKey).toBeUndefined();
+          expect(response._data.address).toBeDefined();
+        },
+      });
+    })
+  });
 });

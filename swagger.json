@@ -1130,6 +1130,12 @@
               "type": "string"
             }
           },
+          "featureFlags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
           "address": {
             "type": "string",
             "description": "User's wallet address"

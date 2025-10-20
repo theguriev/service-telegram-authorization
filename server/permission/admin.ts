@@ -5,4 +5,5 @@ export default [
   "continue-all-users-subscription",
   "get-all-users-transactions",
   "update-all-users-meta",
+  "update-all-users-feature-flags"
 ] as const;

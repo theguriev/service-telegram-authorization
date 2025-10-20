@@ -4,6 +4,7 @@ export default [
   "continue-managed-users-subscription",
   "get-managed-users-transactions",
   "update-managed-users-meta",
+  "update-managed-users-feature-flags",
   "switch-user",
   "switch-previous-user",
   "switch-next-user",
