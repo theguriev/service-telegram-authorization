@@ -46,59 +46,72 @@ const getAllTransactionsBulk = async <
 
   const step = (options.limit ?? 100) as TLimit;
 
-  const asyncAddressTransactions = Array.from({ length: Math.ceil(addresses.length / 50) }, async (_, offset) => {
-    const chunk = addresses.slice(offset * 50, (offset + 1) * 50);
-    const addressTransactions: Response = {
-      transactions: chunk.reduce(
-        (acc, address) => ({
-          ...acc,
-          [address]: [],
-        }),
-        {} as Response["transactions"],
-      ),
-      metadata: {
-        totalAddresses: chunk.length,
-        totalTransactions: 0,
-        addressesWithTransactions: 0,
-        limit: step,
-        order: (options.order ?? "desc") as TOrder,
-        orderBy: (options.orderBy ?? "timestamp") as TOrderBy,
-        filters: {
-          symbol: options.symbol,
-          fromTimestamp: options.fromTimestamp,
-          toTimestamp: options.toTimestamp,
-          value: options.value,
+  const asyncAddressTransactions = Array.from(
+    { length: Math.ceil(addresses.length / 50) },
+    async (_, offset) => {
+      const chunk = addresses.slice(offset * 50, (offset + 1) * 50);
+      const addressTransactions: Response = {
+        transactions: chunk.reduce(
+          (acc, address) => ({
+            ...acc,
+            [address]: [],
+          }),
+          {} as Response["transactions"],
+        ),
+        metadata: {
+          totalAddresses: chunk.length,
+          totalTransactions: 0,
+          addressesWithTransactions: 0,
+          limit: step,
+          order: (options.order ?? "desc") as TOrder,
+          orderBy: (options.orderBy ?? "timestamp") as TOrderBy,
+          filters: {
+            symbol: options.symbol,
+            fromTimestamp: options.fromTimestamp,
+            toTimestamp: options.toTimestamp,
+            value: options.value,
+          },
         },
-      },
-    };
+      };
 
-    for (
-      let offset = 0;
-      addressTransactions.metadata.totalTransactions === offset;
-      offset += step
-    ) {
-      const nextTransactions = await getTransactionsBulk(chunk, {
-        ...options,
-        limit: step,
-        offset,
-      });
-      addressTransactions.transactions = chunk.reduce(
-        (acc, address) => ({
-          ...acc,
-          [address]: [...acc[address], ...nextTransactions.transactions[address]],
-        }),
-        addressTransactions.transactions,
-      );
-      addressTransactions.metadata.totalTransactions +=
-        nextTransactions.metadata.totalTransactions;
-    }
+      for (
+        let offset = 0;
+        new Set(
+          Object.values<Response["transactions"][T[number]]>(
+            addressTransactions.transactions,
+          ).flatMap((item) => item.map((transaction) => transaction._id)),
+        ).size === offset;
+        offset += step
+      ) {
+        const nextTransactions = await getTransactionsBulk(chunk, {
+          ...options,
+          limit: step,
+          offset,
+        });
+        console.log(offset, nextTransactions, addressTransactions);
+        addressTransactions.transactions = chunk.reduce(
+          (acc, address) => ({
+            ...acc,
+            [address]: [
+              ...acc[address],
+              ...nextTransactions.transactions[address],
+            ],
+          }),
+          addressTransactions.transactions,
+        );
+        addressTransactions.metadata.totalTransactions +=
+          nextTransactions.metadata.totalTransactions;
+      }
 
-    addressTransactions.metadata.addressesWithTransactions = Object.values<
-      Response["transactions"][T[number]]
-    >(addressTransactions.transactions).filter((item) => item.length > 0).length;
+      addressTransactions.metadata.addressesWithTransactions = Object.values<
+        Response["transactions"][T[number]]
+      >(addressTransactions.transactions).filter(
+        (item) => item.length > 0,
+      ).length;
 
-    return addressTransactions;
-  });
+      return addressTransactions;
+    },
+  );
 
   const addressTransactions = await Promise.all(asyncAddressTransactions);
 
@@ -111,8 +124,11 @@ const getAllTransactionsBulk = async <
       },
       metadata: {
         ...acc.metadata,
-        totalTransactions: acc.metadata.totalTransactions + chunk.metadata.totalTransactions,
-        addressesWithTransactions: acc.metadata.addressesWithTransactions + chunk.metadata.addressesWithTransactions,
+        totalTransactions:
+          acc.metadata.totalTransactions + chunk.metadata.totalTransactions,
+        addressesWithTransactions:
+          acc.metadata.addressesWithTransactions +
+          chunk.metadata.addressesWithTransactions,
       },
     }),
     {
