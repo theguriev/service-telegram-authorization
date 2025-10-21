@@ -19,7 +19,11 @@ export default eventHandler(async (event) => {
   if (!user) {
     throw createError({ message: "User not found", status: 404 });
   }
-  const transactions = process.env.VITEST === "true" ? [] : await getTransactions(user.address, currencySymbol, validated);
+  const transactions = process.env.VITEST === "true" ? [] : await getTransactions({
+    address: user.address,
+    symbol: currencySymbol,
+    ...validated
+  });
 
   return transactions;
 });

@@ -33,6 +33,11 @@ export default defineTask({
 
     const retrieveStartDate = (date: Date) => addHours(startOfDay(date), date.getHours() >= 21 ? 21 : -3);
     const balances = await getBalance(users.map(user => user.address), currencySymbol);
+    const transactionsBulk = await getAllTransactionsBulk(users.map(user => user.address), {
+      symbol: currencySymbol,
+      order: "asc",
+      limit: 1000
+    });
     for (const { _id, id, address, privateKey, managers } of users) {
       try {
         const balance = balances[address];
@@ -42,9 +47,7 @@ export default defineTask({
           continue;
         }
 
-        const transactions = await getAllTransactions(address, currencySymbol, {
-          order: "asc",
-        });
+        const transactions = transactionsBulk.transactions[address];
         const calculatedBalance = calculateCurrentBalance(
           address,
           transactions,
