@@ -82,7 +82,6 @@ const getAllTransactionsBulk = async <
         limit: step,
         offset,
       });
-      console.log(nextTransactions, addressTransactions);
       addressTransactions.transactions = chunk.reduce(
         (acc, address) => ({
           ...acc,
