@@ -69,8 +69,9 @@ const getTransactionsBulk = async <
       };
     };
   }>(`/billing/transactions/bulk`, {
+    method: 'POST',
     baseURL: bllsBase,
-    query: {
+    body: {
       addresses,
       ...options,
     },

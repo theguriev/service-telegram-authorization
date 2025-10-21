@@ -46,54 +46,100 @@ const getAllTransactionsBulk = async <
 
   const step = (options.limit ?? 100) as TLimit;
 
-  let transactions: Response = {
-    transactions: addresses.reduce(
-      (acc, address) => ({
-        ...acc,
-        [address]: [],
-      }),
-      {} as Response["transactions"],
-    ),
-    metadata: {
-      totalAddresses: addresses.length,
-      totalTransactions: 0,
-      addressesWithTransactions: 0,
-      limit: step,
-      order: (options.order ?? "desc") as TOrder,
-      orderBy: (options.orderBy ?? "timestamp") as TOrderBy,
-      filters: {
-        symbol: options.symbol,
-        fromTimestamp: options.fromTimestamp,
-        toTimestamp: options.toTimestamp,
-        value: options.value,
+  const asyncAddressTransactions = Array.from({ length: Math.ceil(addresses.length / 50) }, async (_, offset) => {
+    const chunk = addresses.slice(offset * 50, (offset + 1) * 50);
+    const addressTransactions: Response = {
+      transactions: chunk.reduce(
+        (acc, address) => ({
+          ...acc,
+          [address]: [],
+        }),
+        {} as Response["transactions"],
+      ),
+      metadata: {
+        totalAddresses: chunk.length,
+        totalTransactions: 0,
+        addressesWithTransactions: 0,
+        limit: step,
+        order: (options.order ?? "desc") as TOrder,
+        orderBy: (options.orderBy ?? "timestamp") as TOrderBy,
+        filters: {
+          symbol: options.symbol,
+          fromTimestamp: options.fromTimestamp,
+          toTimestamp: options.toTimestamp,
+          value: options.value,
+        },
       },
-    },
-  };
+    };
 
-  for (
-    let offset = 0;
-    transactions.metadata.totalTransactions === offset;
-    offset += step
-  ) {
-    const nextTransactions = await getTransactionsBulk(addresses, {
-      ...options,
-      limit: step,
-      offset,
-    });
-    transactions.transactions = addresses.reduce(
-      (acc, address) => ({
-        ...acc,
-        [address]: [...acc[address], ...nextTransactions.transactions[address]],
-      }),
-      transactions.transactions,
-    );
-    transactions.metadata.totalTransactions +=
-      nextTransactions.metadata.totalTransactions;
-  }
+    for (
+      let offset = 0;
+      addressTransactions.metadata.totalTransactions === offset;
+      offset += step
+    ) {
+      const nextTransactions = await getTransactionsBulk(chunk, {
+        ...options,
+        limit: step,
+        offset,
+      });
+      console.log(nextTransactions, addressTransactions);
+      addressTransactions.transactions = chunk.reduce(
+        (acc, address) => ({
+          ...acc,
+          [address]: [...acc[address], ...nextTransactions.transactions[address]],
+        }),
+        addressTransactions.transactions,
+      );
+      addressTransactions.metadata.totalTransactions +=
+        nextTransactions.metadata.totalTransactions;
+    }
 
-  transactions.metadata.addressesWithTransactions = Object.values<
-    Response["transactions"][T[number]]
-  >(transactions.transactions).filter((item) => item.length > 0).length;
+    addressTransactions.metadata.addressesWithTransactions = Object.values<
+      Response["transactions"][T[number]]
+    >(addressTransactions.transactions).filter((item) => item.length > 0).length;
+
+    return addressTransactions;
+  });
+
+  const addressTransactions = await Promise.all(asyncAddressTransactions);
+
+  const transactions = addressTransactions.reduce(
+    (acc, chunk) => ({
+      ...acc,
+      transactions: {
+        ...acc.transactions,
+        ...chunk.transactions,
+      },
+      metadata: {
+        ...acc.metadata,
+        totalTransactions: acc.metadata.totalTransactions + chunk.metadata.totalTransactions,
+        addressesWithTransactions: acc.metadata.addressesWithTransactions + chunk.metadata.addressesWithTransactions,
+      },
+    }),
+    {
+      transactions: addresses.reduce(
+        (acc, address) => ({
+          ...acc,
+          [address]: [],
+        }),
+        {} as Response["transactions"],
+      ),
+      metadata: {
+        totalAddresses: addresses.length,
+        totalTransactions: 0,
+        addressesWithTransactions: 0,
+        limit: step,
+        order: (options.order ?? "desc") as TOrder,
+        orderBy: (options.orderBy ?? "timestamp") as TOrderBy,
+        filters: {
+          symbol: options.symbol,
+          fromTimestamp: options.fromTimestamp,
+          toTimestamp: options.toTimestamp,
+          value: options.value,
+        },
+      },
+    } as Response,
+  );
 
   return transactions;
 };
