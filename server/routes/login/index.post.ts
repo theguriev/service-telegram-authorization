@@ -34,6 +34,7 @@ export default eventHandler(async (event) => {
       privateKey: wallet.privateKey,
       address: wallet.address,
       permissions: [],
+      featureFlags: ["ffMealsV2"],
       meta: {},
     });
     const userSaved = await userDocument.save();

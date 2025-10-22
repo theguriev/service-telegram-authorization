@@ -512,6 +512,43 @@
         }
       }
     },
+    "/update-feature-flags": {
+      "put": {
+        "summary": "Update user feature flags",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateFeatureFlagsRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "User not exists",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/logout": {
       "get": {
         "summary": "Logout user",
@@ -1130,6 +1167,12 @@
               "type": "string"
             }
           },
+          "featureFlags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
           "address": {
             "type": "string",
             "description": "User's wallet address"
@@ -1282,6 +1325,24 @@
           }
         },
         "required": ["meta"]
+      },
+      "UpdateFeatureFlagsRequest": {
+        "type": "object",
+        "properties": {
+          "featureFlags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Array of feature flags to update."
+          },
+          "userId": {
+            "type": "string",
+            "description": "ID of the user to update feature flags for",
+            "pattern": "^[0-9a-fA-F]{24}$"
+          }
+        },
+        "required": ["featureFlags"]
       },
       "GetUsersByAddressesRequest": {
         "type": "object",
