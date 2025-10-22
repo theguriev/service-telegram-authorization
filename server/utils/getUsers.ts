@@ -266,7 +266,11 @@ const getUsers = async (currencySymbol: string, userId: string, event: H3Event<E
   const balances = await getBalance(data.map(user => user.address), currencySymbol);
   const asyncTransformedData = data.map(async (item) => {
     const balance = balances[item.address];
-    const transaction = await getTransactions(item.address, currencySymbol, { limit: 1 });
+    const transaction = await getTransactions({
+      address: item.address,
+      symbol: currencySymbol,
+      limit: 1
+    });
     return {
       ...item,
       balance,

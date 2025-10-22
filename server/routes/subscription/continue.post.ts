@@ -44,7 +44,10 @@ export default eventHandler(async (event) => {
     });
   }
   if (process.env.VITEST !== "true") {
-    const transactions = await getTransactions(receiver.address, currencySymbol);
+    const transactions = await getTransactions({
+      address: receiver.address,
+      symbol: currencySymbol
+    });
 
     const subscriptionDuration = transactions.length ? 60 : 62;
     await sendTransaction(
