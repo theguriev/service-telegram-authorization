@@ -51,8 +51,11 @@ export default eventHandler(async (event) => {
   if (!valid) {
     throw createError({ message: "Invalid user hash!", status: 403 });
   }
+  console.log("log: 1 ");
   const userRecord = await ModelUser.findOne({ id });
+  console.log("log: 2 ");
   if (userRecord === null) {
+    console.log("log: 3 ");
     const wallet = Wallet.createRandom();
     const userDocument = new ModelUser({
       id,
@@ -68,7 +71,9 @@ export default eventHandler(async (event) => {
       featureFlags: ["ffMealsV2"],
       meta: {},
     });
+    console.log("log: 4 ");
     const userSaved = await userDocument.save();
+    console.log("log: 5 ");
     const userId = userSaved._id.toString();
     const role = userSaved.role || "user";
     const { save } = useTokens({
@@ -82,6 +87,7 @@ export default eventHandler(async (event) => {
   }
   const _id = userRecord._id.toString();
   const role = userRecord.role || "user";
+  console.log("log: 6 ");
   await ModelUser.updateOne(
     {
       _id,
@@ -104,6 +110,8 @@ export default eventHandler(async (event) => {
     role,
     id: _id,
   });
+  console.log("log: 7 ");
   save();
+  console.log("log: 8 ");
   return ModelUser.findOne({ _id });
 });
