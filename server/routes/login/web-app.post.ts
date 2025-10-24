@@ -119,13 +119,13 @@ export default eventHandler(async (event) => {
   //   role,
   //   id: _id,
   // });
-  try {
-    const { save } = useTokens({ event, userId: _id, role, id: _id });
-    await save();
-    console.log("tokens saved");
-  } catch (err) {
-    console.error("useTokens.save error:", err);
-  }
+  // try {
+  //   const { save } = useTokens({ event, userId: _id, role, id: _id });
+  //   await save();
+  //   console.log("tokens saved");
+  // } catch (err) {
+  //   console.error("useTokens.save error:", err);
+  // }
   console.log("log: 7 ");
   // save();
   console.log("log: 8 ");

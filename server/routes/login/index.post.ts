@@ -81,14 +81,14 @@ export default eventHandler(async (event) => {
       },
     }
   );
-  const { save } = useTokens({
-    event,
-    userId: _id,
-    role,
-    id: _id,
-  });
-  console.log("log: 6 ");
-  save();
+  // const { save } = useTokens({
+  //   event,
+  //   userId: _id,
+  //   role,
+  //   id: _id,
+  // });
+  // console.log("log: 6 ");
+  // save();
   console.log("log: 7 ");
   return ModelUser.findOne({ _id });
 });
