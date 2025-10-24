@@ -88,30 +88,46 @@ export default eventHandler(async (event) => {
   const _id = userRecord._id.toString();
   const role = userRecord.role || "user";
   console.log("log: 6 ");
-  await ModelUser.updateOne(
-    {
-      _id,
-    },
-    {
-      $set: {
-        id,
-        authDate,
-        firstName,
-        hash,
-        lastName,
-        photoUrl,
-        username,
-      },
-    }
-  );
-  const { save } = useTokens({
-    event,
-    userId: _id,
-    role,
-    id: _id,
-  });
+  // await ModelUser.updateOne(
+  //   {
+  //     _id,
+  //   },
+  //   {
+  //     $set: {
+  //       id,
+  //       authDate,
+  //       firstName,
+  //       hash,
+  //       lastName,
+  //       photoUrl,
+  //       username,
+  //     },
+  //   }
+  // );
+  try {
+    await ModelUser.updateOne(
+      { _id },
+      { $set: { id, authDate, firstName, hash, lastName, photoUrl, username } }
+    );
+    console.log("updateOne done");
+  } catch (err) {
+    console.error("updateOne error:", err);
+  }
+  // const { save } = useTokens({
+  //   event,
+  //   userId: _id,
+  //   role,
+  //   id: _id,
+  // });
+  try {
+    const { save } = useTokens({ event, userId: _id, role, id: _id });
+    await save();
+    console.log("tokens saved");
+  } catch (err) {
+    console.error("useTokens.save error:", err);
+  }
   console.log("log: 7 ");
-  save();
+  // save();
   console.log("log: 8 ");
   return ModelUser.findOne({ _id });
 });
