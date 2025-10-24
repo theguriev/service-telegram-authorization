@@ -20,6 +20,12 @@ export default eventHandler(async (event) => {
   const valid = isValidTelegramHash(validated, botToken, true);
 
   const { user, receiver, authDate, hash } = validated;
+  console.log("log: trying to login via web app ", {
+    user,
+    receiver,
+    authDate,
+    hash,
+  });
   if (!user && !receiver) {
     throw createError({
       message: "Either 'user' or 'receiver' must be provided.",
