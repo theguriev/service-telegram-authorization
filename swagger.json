@@ -1,1441 +1,1450 @@
 {
-  "openapi": "3.0.0",
-  "info": {
-    "title": "Telegram Authorization Service",
-    "version": "1.0.0"
-  },
-  "paths": {
-    "/login": {
-      "post": {
-        "summary": "Login using Telegram credentials",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/LoginRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful login",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UserResponse"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Invalid user hash",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/": {
-      "get": {
-        "summary": "Get user details",
-        "responses": {
-          "200": {
-            "description": "Successful operation",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UserResponse"
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "User not exists",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/initial": {
-      "get": {
-        "summary": "Get initial user details",
-        "responses": {
-          "200": {
-            "description": "Successful operation",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UserResponse"
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "User not exists",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/transactions": {
-      "get": {
-        "tags": ["subscriptions"],
-        "summary": "Get user transactions",
-        "parameters": [
-          {
-            "name": "order",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "enum": ["asc", "desc"],
-              "default": "asc",
-              "description": "Order of transactions, either ascending or descending"
-            }
-          },
-          {
-            "name": "orderBy",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "enum": [
-                "_id",
-                "from",
-                "to",
-                "symbol",
-                "timestamp",
-                "message",
-                "value"
-              ],
-              "default": "timestamp",
-              "description": "Field to order transactions by"
-            }
-          },
-          {
-            "name": "offset",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "default": 0,
-              "description": "Number of records to skip for pagination"
-            }
-          },
-          {
-            "name": "limit",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "default": 10,
-              "description": "Maximum number of records to return"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful operation",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/TransactionResponse"
-                  }
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "User not found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/transactions/{userId}": {
-      "get": {
-        "tags": ["subscriptions"],
-        "summary": "Get user transactions for a specific user ID",
-        "parameters": [
-          {
-            "name": "userId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "description": "ID of the user to get transactions for",
-              "example": "60c72b2f9b1e8b001c8e4d3a"
-            }
-          },
-          {
-            "name": "order",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "enum": ["asc", "desc"],
-              "default": "asc",
-              "description": "Order of transactions, either ascending or descending"
-            }
-          },
-          {
-            "name": "orderBy",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "enum": [
-                "_id",
-                "from",
-                "to",
-                "symbol",
-                "timestamp",
-                "message",
-                "value"
-              ],
-              "default": "timestamp",
-              "description": "Field to order transactions by"
-            }
-          },
-          {
-            "name": "offset",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "default": 0,
-              "description": "Number of records to skip for pagination"
-            }
-          },
-          {
-            "name": "limit",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "default": 10,
-              "description": "Maximum number of records to return"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful operation",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/TransactionResponse"
-                  }
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Unauthorized to view transactions",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Owner not found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "User not exists",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/balance": {
-      "get": {
-        "tags": ["subscriptions"],
-        "summary": "Get user balance",
-        "responses": {
-          "200": {
-            "description": "Successful operation",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/BalanceResponse"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "User not found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/balance/{userId}": {
-      "get": {
-        "tags": ["subscriptions"],
-        "summary": "Get user balance for a specific user ID",
-        "parameters": [
-          {
-            "name": "userId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "description": "ID of the user to get balance for",
-              "example": "60c72b2f9b1e8b001c8e4d3a"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful operation",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/BalanceResponse"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Unauthorized to view balance",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Owner not found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "User not exists",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/subscription/continue": {
-      "post": {
-        "tags": ["subscriptions"],
-        "summary": "Continue user subscription",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ContinueSubscriptionRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful operation",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ContinueSubscriptionResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Receiver already contains balance",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Unauthorized to continue subscription",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Receiver not found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "User not exists",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/refresh": {
-      "get": {
-        "summary": "Refresh user tokens",
-        "responses": {
-          "200": {
-            "description": "Successful operation",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UserResponse"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Refresh token not found or user not found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/update-meta": {
-      "put": {
-        "summary": "Update user meta information",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateMetaRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful operation",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UserResponse"
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "User not exists",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/update-feature-flags": {
-      "put": {
-        "summary": "Update user feature flags",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateFeatureFlagsRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful operation",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UserResponse"
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "User not exists",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/logout": {
-      "get": {
-        "summary": "Logout user",
-        "responses": {
-          "200": {
-            "description": "Successful logout",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/LogoutResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/login/web-app": {
-      "post": {
-        "tags": ["auth"],
-        "summary": "Login with Telegram Web App data",
-        "description": "Authenticate a user with Telegram Web App credentials",
-        "operationId": "loginWebApp",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/TelegramWebAppLoginRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful login",
-            "headers": {
-              "Set-Cookie": {
-                "schema": {
-                  "type": "string",
-                  "example": "accessToken=xyz; refreshToken=abc"
-                }
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UserResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Validation error"
-          },
-          "403": {
-            "description": "Invalid signature"
-          }
-        }
-      }
-    },
-    "/users": {
-      "get": {
-        "tags": ["users"],
-        "summary": "List users with optional search and pagination",
-        "description": "Retrieves a list of users. Requires admin privileges. Supports pagination and search by first or last name.",
-        "operationId": "listUsers",
-        "parameters": [
-          {
-            "name": "offset",
-            "in": "query",
-            "description": "Number of records to skip for pagination",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 0,
-              "minimum": 0
-            }
-          },
-          {
-            "name": "limit",
-            "in": "query",
-            "description": "Maximum number of records to return",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 10,
-              "minimum": 1
-            }
-          },
-          {
-            "name": "search",
-            "in": "query",
-            "description": "Search term to filter users by first name or last name (case-insensitive)",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "report",
-            "in": "query",
-            "description": "Filter users by report",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "enum": ["all", "with", "without"],
-              "default": "all"
-            }
-          },
-          {
-            "name": "measurement",
-            "in": "query",
-            "description": "Filter users by measurement",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "enum": ["all", "with", "without"],
-              "default": "all"
-            }
-          },
-          {
-            "name": "status",
-            "in": "query",
-            "description": "Filter users by balance status",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "enum": ["all", "new", "with balance", "without balance"],
-              "default": "all"
-            }
-          },
-          {
-            "name": "archived",
-            "in": "query",
-            "description": "Filter users by archived status",
-            "required": false,
-            "schema": {
-              "type": "boolean",
-              "default": false
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "A list of users",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/UserResponse"
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request - Invalid query parameters (e.g., offset, limit)",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized - Missing or invalid authentication token",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Forbidden - User does not have admin privileges",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal Server Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "cookieAuth": []
-          }
-        ]
-      }
-    },
-    "/users/switch": {
-      "post": {
-        "tags": ["users"],
-        "summary": "Switch admin session to another user",
-        "description": "Allows an admin to switch their session to another user. Requires admin privileges. Sets new access and refresh tokens for the target user.",
-        "operationId": "switchUserSession",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SwitchUserRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Session switched successfully. Returns the target user.",
-            "headers": {
-              "Set-Cookie": {
-                "schema": {
-                  "type": "string",
-                  "example": "accessToken=xyz; refreshToken=abc"
-                }
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UserResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Missing or invalid userId",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized - Not authenticated",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
-              }
-            }
-          },
-          "403": {
-            "description": "Forbidden - Not an admin",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
-              }
-            }
-          },
-          "404": {
-            "description": "User not found",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
-              }
-            }
-          }
-        },
-        "security": [{ "cookieAuth": [] }]
-      }
-    },
-    "/users/switch/next": {
-      "post": {
-        "tags": ["users"],
-        "summary": "Switch to next user in the switch sequence",
-        "description": "Switches to the next user in the admin switch sequence. Requires active switch session.",
-        "operationId": "switchToNextUser",
-        "responses": {
-          "200": {
-            "description": "Successfully switched to next user",
-            "headers": {
-              "Set-Cookie": {
-                "schema": {
-                  "type": "string",
-                  "example": "accessToken=xyz; refreshToken=abc"
-                }
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "status": {
-                      "type": "string",
-                      "enum": ["success", "return"],
-                      "description": "Status of the switch operation"
-                    },
-                    "user": {
-                      "$ref": "#/components/schemas/UserResponse"
-                    },
-                    "usersRequest": {
-                      "$ref": "#/components/schemas/UsersRequest"
-                    }
-                  },
-                  "required": ["status", "user"]
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Already at the last user or invalid request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized - Not authenticated",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Forbidden - Not an admin",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Switch info not found or next user not found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          }
-        },
-        "security": [{ "cookieAuth": [] }]
-      }
-    },
-    "/users/switch/previous": {
-      "post": {
-        "tags": ["users"],
-        "summary": "Switch to previous user in the switch sequence",
-        "description": "Switches to the previous user in the admin switch sequence. Requires active switch session.",
-        "operationId": "switchToPreviousUser",
-        "responses": {
-          "200": {
-            "description": "Successfully switched to previous user",
-            "headers": {
-              "Set-Cookie": {
-                "schema": {
-                  "type": "string",
-                  "example": "accessToken=xyz; refreshToken=abc"
-                }
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "status": {
-                      "type": "string",
-                      "enum": ["success", "return"],
-                      "description": "Status of the switch operation"
-                    },
-                    "user": {
-                      "$ref": "#/components/schemas/UserResponse"
-                    },
-                    "usersRequest": {
-                      "$ref": "#/components/schemas/UsersRequest"
-                    }
-                  },
-                  "required": ["status", "user"]
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "No previous user available or invalid request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized - Not authenticated",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Forbidden - Not an admin",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Switch info not found or previous user not found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          }
-        },
-        "security": [{ "cookieAuth": [] }]
-      }
-    },
-    "/users/by-addresses": {
-      "post": {
-        "tags": ["users"],
-        "summary": "Get users by wallet addresses",
-        "description": "Retrieves users based on their wallet addresses. Requires admin privileges. Returns users that match any of the provided addresses.",
-        "operationId": "getUsersByAddresses",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/GetUsersByAddressesRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "List of users matching the provided addresses",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/UserResponse"
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request - Invalid request body (e.g., empty addresses array, invalid format)",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized - Missing or invalid authentication token",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Forbidden - User does not have admin privileges",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal Server Error - Database query failed",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "cookieAuth": []
-          }
-        ]
-      }
-    }
-  },
-  "components": {
-    "schemas": {
-      "ContinueSubscriptionRequest": {
-        "type": "object",
-        "properties": {
-          "receiver": {
-            "type": "string",
-            "description": "ID of the user to continue subscription for",
-            "example": "60c72b2f9b1e8b001c8e4d3a"
-          }
-        },
-        "required": ["receiver"]
-      },
-      "ContinueSubscriptionResponse": {
-        "type": "object",
-        "properties": {
-          "success": {
-            "type": "boolean",
-            "description": "Indicates if the subscription continuation was successful",
-            "example": true
-          }
-        },
-        "required": ["success"]
-      },
-      "LoginRequest": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "integer",
-            "example": 123456789
-          },
-          "firstName": {
-            "type": "string",
-            "example": "John"
-          },
-          "lastName": {
-            "type": "string",
-            "example": "Doe"
-          },
-          "username": {
-            "type": "string",
-            "example": "johndoe"
-          },
-          "photoUrl": {
-            "type": "string",
-            "example": "https://example.com/photo.jpg"
-          },
-          "authDate": {
-            "type": "integer",
-            "example": 1620000000
-          },
-          "hash": {
-            "type": "string",
-            "example": "abcdef123456"
-          }
-        },
-        "required": ["id", "firstName", "authDate", "hash"]
-      },
-      "UserResponse": {
-        "type": "object",
-        "properties": {
-          "_id": {
-            "type": "string"
-          },
-          "id": {
-            "type": "integer"
-          },
-          "firstName": {
-            "type": "string"
-          },
-          "lastName": {
-            "type": "string"
-          },
-          "username": {
-            "type": "string"
-          },
-          "photoUrl": {
-            "type": "string"
-          },
-          "authDate": {
-            "type": "integer"
-          },
-          "hash": {
-            "type": "string"
-          },
-          "role": {
-            "type": "string",
-            "description": "User role in the system"
-          },
-          "permissions": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "featureFlags": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "address": {
-            "type": "string",
-            "description": "User's wallet address"
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "updatedAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "meta": {
-            "type": "object",
-            "additionalProperties": {
-              "anyOf": [
-                { "type": "string" },
-                { "type": "number" },
-                { "type": "boolean" }
-              ],
-              "nullable": true
-            },
-            "description": "User metadata where keys are strings and values can be strings or numbers."
-          }
-        },
-        "required": ["_id", "id", "firstName", "address", "hash", "permissions", "updatedAt", "createdAt"]
-      },
-      "UsersRequest": {
-        "type": "object",
-        "properties": {
-          "offset": {
-            "type": "integer",
-            "default": 0,
-            "description": "Number of users to skip"
-          },
-          "limit": {
-            "type": "integer",
-            "default": 10,
-            "description": "Maximum number of users to return"
-          },
-          "search": {
-            "type": "string",
-            "description": "Search term to filter users by name or username"
-          },
-          "report": {
-            "type": "string",
-            "enum": ["all", "with", "without"],
-            "default": "all",
-            "description": "Filter users by report status"
-          },
-          "measurement": {
-            "type": "string",
-            "enum": ["all", "with", "without"],
-            "default": "all",
-            "description": "Filter users by measurement status"
-          },
-          "status": {
-            "type": "string",
-            "enum": ["all", "new", "with balance", "without balance"],
-            "default": "all",
-            "description": "Filter users by status"
-          },
-          "archived": {
-            "type": "boolean",
-            "default": false,
-            "description": "Filter users by archived status"
-          }
-        }
-      },
-      "SwitchUserRequest": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "description": "Target user _id (MongoDB ObjectId)"
-          },
-          "usersRequest": {
-            "$ref": "#/components/schemas/UsersRequest"
-          }
-        },
-        "required": ["id"]
-      },
-      "TransactionResponse": {
-        "type": "object",
-        "properties": {
-          "_id": {
-            "type": "string",
-            "description": "Unique identifier for the transaction"
-          },
-          "from": {
-            "type": "string",
-            "description": "Sender's identifier"
-          },
-          "to": {
-            "type": "string",
-            "description": "Receiver's identifier"
-          },
-          "symbol": {
-            "type": "string",
-            "description": "Currency symbol of the transaction"
-          },
-          "timestamp": {
-            "type": "integer",
-            "description": "Timestamp of the transaction in seconds since epoch"
-          },
-          "message": {
-            "type": "string",
-            "description": "Optional message associated with the transaction"
-          },
-          "value": {
-            "type": "number",
-            "description": "Amount of the transaction"
-          },
-          "__v": {
-            "type": "number",
-            "description": "Version of the transaction document"
-          }
-        },
-        "required": ["_id", "from", "to", "symbol", "timestamp", "value", "__v"]
-      },
-      "BalanceResponse": {
-        "type": "object",
-        "properties": {
-          "balance": {
-            "type": "number",
-            "description": "Current balance of the user"
-          }
-        },
-        "required": ["balance"]
-      },
-      "UpdateMetaRequest": {
-        "type": "object",
-        "properties": {
-          "meta": {
-            "type": "object",
-            "additionalProperties": {
-              "anyOf": [
-                { "type": "string" },
-                { "type": "number" },
-                { "type": "boolean" }
-              ],
-              "nullable": true
-            },
-            "description": "User metadata where keys are strings and values can be strings or numbers."
-          },
-          "userId": {
-            "type": "string",
-            "description": "ID of the user to update metadata for",
-            "pattern": "^[0-9a-fA-F]{24}$"
-          }
-        },
-        "required": ["meta"]
-      },
-      "UpdateFeatureFlagsRequest": {
-        "type": "object",
-        "properties": {
-          "featureFlags": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "description": "Array of feature flags to update."
-          },
-          "userId": {
-            "type": "string",
-            "description": "ID of the user to update feature flags for",
-            "pattern": "^[0-9a-fA-F]{24}$"
-          }
-        },
-        "required": ["featureFlags"]
-      },
-      "GetUsersByAddressesRequest": {
-        "type": "object",
-        "required": ["addresses"],
-        "properties": {
-          "addresses": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "minItems": 1,
-            "description": "Array of wallet addresses to search for. Must contain at least one address.",
-            "example": [
-              "0x6294C7251D145bbe9B2f529FdD6D5D42E1d0DeA4",
-              "0x7d1afa7b718fb893db30a3abc0cfc608aacfebb0"
-            ]
-          }
-        }
-      },
-      "ErrorResponse": {
-        "type": "object",
-        "properties": {
-          "message": {
-            "type": "string",
-            "example": "Error message"
-          }
-        }
-      },
-      "LogoutResponse": {
-        "type": "object",
-        "properties": {
-          "message": {
-            "type": "string",
-            "example": "User logged out successfully"
-          }
-        }
-      },
-      "TelegramWebAppLoginRequest": {
-        "type": "object",
-        "required": ["hash", "authDate", "signature"],
-        "properties": {
-          "queryId": {
-            "type": "string",
-            "example": "AAEXTKEWAAAAABdMoRawpVCK"
-          },
-          "user": {
-            "type": "string",
-            "description": "JSON string containing user information",
-            "example": "{\"id\":379669527,\"first_name\":\"eugen\",\"last_name\":\"\",\"username\":\"theguriev\",\"language_code\":\"en\",\"allows_write_to_pm\":true,\"photo_url\":\"https://t.me/i/userpic/320/example.jpg\"}"
-          },
-          "receiver": {
-            "type": "string",
-            "description": "JSON string containing receiver information (fallback when user is not provided)",
-            "example": "{\"id\":379669527,\"first_name\":\"eugen\",\"last_name\":\"\",\"username\":\"theguriev\",\"language_code\":\"en\",\"allows_write_to_pm\":true,\"photo_url\":\"https://t.me/i/userpic/320/example.jpg\"}"
-          },
-          "authDate": {
-            "type": "integer",
-            "example": 1745179538
-          },
-          "signature": {
-            "type": "string",
-            "example": "zQf7zeXzKVekQpFT8Zxuf7_gxIuj3xAdo1ZtZn2_gEP4lHJgt0KUeBIEH6iAJp--n56H7ZHXYxco1zpW2a5CAA"
-          },
-          "hash": {
-            "type": "string",
-            "example": "217946472939261db8e248b313882b9ab3ed4e7ce5f1de25996d51aba52a1bfc"
-          },
-          "canSendAfter": {
-            "type": "integer",
-            "example": 1745179538
-          },
-          "chat": {
-            "type": "string"
-          },
-          "chatType": {
-            "type": "string",
-            "enum": ["sender", "private", "group", "supergroup", "channel"]
-          },
-          "chatInstance": {
-            "type": "string"
-          },
-          "startParam": {
-            "type": "string"
-          }
-        }
-      }
-    },
-    "securitySchemes": {
-      "cookieAuth": {
-        "type": "apiKey",
-        "in": "cookie",
-        "name": "accessToken"
-      }
-    }
-  }
+	"openapi": "3.0.0",
+	"info": {
+		"title": "Telegram Authorization Service",
+		"version": "1.0.0"
+	},
+	"paths": {
+		"/login": {
+			"post": {
+				"summary": "Login using Telegram credentials",
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/LoginRequest"
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful login",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/UserResponse"
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Invalid user hash",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/": {
+			"get": {
+				"summary": "Get user details",
+				"responses": {
+					"200": {
+						"description": "Successful operation",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/UserResponse"
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "User not exists",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/initial": {
+			"get": {
+				"summary": "Get initial user details",
+				"responses": {
+					"200": {
+						"description": "Successful operation",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/UserResponse"
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "User not exists",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/transactions": {
+			"get": {
+				"tags": ["subscriptions"],
+				"summary": "Get user transactions",
+				"parameters": [
+					{
+						"name": "order",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"type": "string",
+							"enum": ["asc", "desc"],
+							"default": "asc",
+							"description": "Order of transactions, either ascending or descending"
+						}
+					},
+					{
+						"name": "orderBy",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"type": "string",
+							"enum": [
+								"_id",
+								"from",
+								"to",
+								"symbol",
+								"timestamp",
+								"message",
+								"value"
+							],
+							"default": "timestamp",
+							"description": "Field to order transactions by"
+						}
+					},
+					{
+						"name": "offset",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"type": "integer",
+							"default": 0,
+							"description": "Number of records to skip for pagination"
+						}
+					},
+					{
+						"name": "limit",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"type": "integer",
+							"default": 10,
+							"description": "Maximum number of records to return"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful operation",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "array",
+									"items": {
+										"$ref": "#/components/schemas/TransactionResponse"
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "User not found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/transactions/{userId}": {
+			"get": {
+				"tags": ["subscriptions"],
+				"summary": "Get user transactions for a specific user ID",
+				"parameters": [
+					{
+						"name": "userId",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"description": "ID of the user to get transactions for",
+							"example": "60c72b2f9b1e8b001c8e4d3a"
+						}
+					},
+					{
+						"name": "order",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"type": "string",
+							"enum": ["asc", "desc"],
+							"default": "asc",
+							"description": "Order of transactions, either ascending or descending"
+						}
+					},
+					{
+						"name": "orderBy",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"type": "string",
+							"enum": [
+								"_id",
+								"from",
+								"to",
+								"symbol",
+								"timestamp",
+								"message",
+								"value"
+							],
+							"default": "timestamp",
+							"description": "Field to order transactions by"
+						}
+					},
+					{
+						"name": "offset",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"type": "integer",
+							"default": 0,
+							"description": "Number of records to skip for pagination"
+						}
+					},
+					{
+						"name": "limit",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"type": "integer",
+							"default": 10,
+							"description": "Maximum number of records to return"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful operation",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "array",
+									"items": {
+										"$ref": "#/components/schemas/TransactionResponse"
+									}
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Unauthorized to view transactions",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Owner not found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "User not exists",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/balance": {
+			"get": {
+				"tags": ["subscriptions"],
+				"summary": "Get user balance",
+				"responses": {
+					"200": {
+						"description": "Successful operation",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/BalanceResponse"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "User not found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/balance/{userId}": {
+			"get": {
+				"tags": ["subscriptions"],
+				"summary": "Get user balance for a specific user ID",
+				"parameters": [
+					{
+						"name": "userId",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"description": "ID of the user to get balance for",
+							"example": "60c72b2f9b1e8b001c8e4d3a"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful operation",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/BalanceResponse"
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Unauthorized to view balance",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Owner not found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "User not exists",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/subscription/continue": {
+			"post": {
+				"tags": ["subscriptions"],
+				"summary": "Continue user subscription",
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/ContinueSubscriptionRequest"
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful operation",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ContinueSubscriptionResponse"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Receiver already contains balance",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Unauthorized to continue subscription",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Receiver not found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "User not exists",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/refresh": {
+			"get": {
+				"summary": "Refresh user tokens",
+				"responses": {
+					"200": {
+						"description": "Successful operation",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/UserResponse"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Refresh token not found or user not found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/update-meta": {
+			"put": {
+				"summary": "Update user meta information",
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/UpdateMetaRequest"
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful operation",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/UserResponse"
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "User not exists",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/update-feature-flags": {
+			"put": {
+				"summary": "Update user feature flags",
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/UpdateFeatureFlagsRequest"
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful operation",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/UserResponse"
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "User not exists",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/logout": {
+			"get": {
+				"summary": "Logout user",
+				"responses": {
+					"200": {
+						"description": "Successful logout",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/LogoutResponse"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/login/web-app": {
+			"post": {
+				"tags": ["auth"],
+				"summary": "Login with Telegram Web App data",
+				"description": "Authenticate a user with Telegram Web App credentials",
+				"operationId": "loginWebApp",
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/TelegramWebAppLoginRequest"
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful login",
+						"headers": {
+							"Set-Cookie": {
+								"schema": {
+									"type": "string",
+									"example": "accessToken=xyz; refreshToken=abc"
+								}
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/UserResponse"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation error"
+					},
+					"403": {
+						"description": "Invalid signature"
+					}
+				}
+			}
+		},
+		"/users": {
+			"get": {
+				"tags": ["users"],
+				"summary": "List users with optional search and pagination",
+				"description": "Retrieves a list of users. Requires admin privileges. Supports pagination and search by first or last name.",
+				"operationId": "listUsers",
+				"parameters": [
+					{
+						"name": "offset",
+						"in": "query",
+						"description": "Number of records to skip for pagination",
+						"required": false,
+						"schema": {
+							"type": "integer",
+							"format": "int32",
+							"default": 0,
+							"minimum": 0
+						}
+					},
+					{
+						"name": "limit",
+						"in": "query",
+						"description": "Maximum number of records to return",
+						"required": false,
+						"schema": {
+							"type": "integer",
+							"format": "int32",
+							"default": 10,
+							"minimum": 1
+						}
+					},
+					{
+						"name": "search",
+						"in": "query",
+						"description": "Search term to filter users by first name or last name (case-insensitive)",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"name": "report",
+						"in": "query",
+						"description": "Filter users by report",
+						"required": false,
+						"schema": {
+							"type": "string",
+							"enum": ["all", "with", "without"],
+							"default": "all"
+						}
+					},
+					{
+						"name": "measurement",
+						"in": "query",
+						"description": "Filter users by measurement",
+						"required": false,
+						"schema": {
+							"type": "string",
+							"enum": ["all", "with", "without"],
+							"default": "all"
+						}
+					},
+					{
+						"name": "status",
+						"in": "query",
+						"description": "Filter users by balance status",
+						"required": false,
+						"schema": {
+							"type": "string",
+							"enum": ["all", "new", "with balance", "without balance"],
+							"default": "all"
+						}
+					},
+					{
+						"name": "archived",
+						"in": "query",
+						"description": "Filter users by archived status",
+						"required": false,
+						"schema": {
+							"type": "boolean",
+							"default": false
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "A list of users",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "array",
+									"items": {
+										"$ref": "#/components/schemas/UserResponse"
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Bad Request - Invalid query parameters (e.g., offset, limit)",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Unauthorized - Missing or invalid authentication token",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Forbidden - User does not have admin privileges",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						}
+					}
+				},
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				]
+			}
+		},
+		"/users/switch": {
+			"post": {
+				"tags": ["users"],
+				"summary": "Switch admin session to another user",
+				"description": "Allows an admin to switch their session to another user. Requires admin privileges. Sets new access and refresh tokens for the target user.",
+				"operationId": "switchUserSession",
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/SwitchUserRequest"
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Session switched successfully. Returns the target user.",
+						"headers": {
+							"Set-Cookie": {
+								"schema": {
+									"type": "string",
+									"example": "accessToken=xyz; refreshToken=abc"
+								}
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/UserResponse"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Missing or invalid userId",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ErrorResponse" }
+							}
+						}
+					},
+					"401": {
+						"description": "Unauthorized - Not authenticated",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ErrorResponse" }
+							}
+						}
+					},
+					"403": {
+						"description": "Forbidden - Not an admin",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ErrorResponse" }
+							}
+						}
+					},
+					"404": {
+						"description": "User not found",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ErrorResponse" }
+							}
+						}
+					}
+				},
+				"security": [{ "cookieAuth": [] }]
+			}
+		},
+		"/users/switch/next": {
+			"post": {
+				"tags": ["users"],
+				"summary": "Switch to next user in the switch sequence",
+				"description": "Switches to the next user in the admin switch sequence. Requires active switch session.",
+				"operationId": "switchToNextUser",
+				"responses": {
+					"200": {
+						"description": "Successfully switched to next user",
+						"headers": {
+							"Set-Cookie": {
+								"schema": {
+									"type": "string",
+									"example": "accessToken=xyz; refreshToken=abc"
+								}
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"status": {
+											"type": "string",
+											"enum": ["success", "return"],
+											"description": "Status of the switch operation"
+										},
+										"user": {
+											"$ref": "#/components/schemas/UserResponse"
+										},
+										"usersRequest": {
+											"$ref": "#/components/schemas/UsersRequest"
+										}
+									},
+									"required": ["status", "user"]
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Already at the last user or invalid request",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Unauthorized - Not authenticated",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Forbidden - Not an admin",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Switch info not found or next user not found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						}
+					}
+				},
+				"security": [{ "cookieAuth": [] }]
+			}
+		},
+		"/users/switch/previous": {
+			"post": {
+				"tags": ["users"],
+				"summary": "Switch to previous user in the switch sequence",
+				"description": "Switches to the previous user in the admin switch sequence. Requires active switch session.",
+				"operationId": "switchToPreviousUser",
+				"responses": {
+					"200": {
+						"description": "Successfully switched to previous user",
+						"headers": {
+							"Set-Cookie": {
+								"schema": {
+									"type": "string",
+									"example": "accessToken=xyz; refreshToken=abc"
+								}
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"status": {
+											"type": "string",
+											"enum": ["success", "return"],
+											"description": "Status of the switch operation"
+										},
+										"user": {
+											"$ref": "#/components/schemas/UserResponse"
+										},
+										"usersRequest": {
+											"$ref": "#/components/schemas/UsersRequest"
+										}
+									},
+									"required": ["status", "user"]
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "No previous user available or invalid request",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Unauthorized - Not authenticated",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Forbidden - Not an admin",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Switch info not found or previous user not found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						}
+					}
+				},
+				"security": [{ "cookieAuth": [] }]
+			}
+		},
+		"/users/by-addresses": {
+			"post": {
+				"tags": ["users"],
+				"summary": "Get users by wallet addresses",
+				"description": "Retrieves users based on their wallet addresses. Requires admin privileges. Returns users that match any of the provided addresses.",
+				"operationId": "getUsersByAddresses",
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/GetUsersByAddressesRequest"
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "List of users matching the provided addresses",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "array",
+									"items": {
+										"$ref": "#/components/schemas/UserResponse"
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Bad Request - Invalid request body (e.g., empty addresses array, invalid format)",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Unauthorized - Missing or invalid authentication token",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Forbidden - User does not have admin privileges",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error - Database query failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						}
+					}
+				},
+				"security": [
+					{
+						"cookieAuth": []
+					}
+				]
+			}
+		}
+	},
+	"components": {
+		"schemas": {
+			"ContinueSubscriptionRequest": {
+				"type": "object",
+				"properties": {
+					"receiver": {
+						"type": "string",
+						"description": "ID of the user to continue subscription for",
+						"example": "60c72b2f9b1e8b001c8e4d3a"
+					}
+				},
+				"required": ["receiver"]
+			},
+			"ContinueSubscriptionResponse": {
+				"type": "object",
+				"properties": {
+					"success": {
+						"type": "boolean",
+						"description": "Indicates if the subscription continuation was successful",
+						"example": true
+					}
+				},
+				"required": ["success"]
+			},
+			"LoginRequest": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"type": "integer",
+						"example": 123456789
+					},
+					"firstName": {
+						"type": "string",
+						"example": "John"
+					},
+					"lastName": {
+						"type": "string",
+						"example": "Doe"
+					},
+					"username": {
+						"type": "string",
+						"example": "johndoe"
+					},
+					"photoUrl": {
+						"type": "string",
+						"example": "https://example.com/photo.jpg"
+					},
+					"authDate": {
+						"type": "integer",
+						"example": 1620000000
+					},
+					"hash": {
+						"type": "string",
+						"example": "abcdef123456"
+					}
+				},
+				"required": ["id", "firstName", "authDate", "hash"]
+			},
+			"UserResponse": {
+				"type": "object",
+				"properties": {
+					"_id": {
+						"type": "string"
+					},
+					"id": {
+						"type": "integer"
+					},
+					"firstName": {
+						"type": "string"
+					},
+					"lastName": {
+						"type": "string"
+					},
+					"username": {
+						"type": "string"
+					},
+					"photoUrl": {
+						"type": "string"
+					},
+					"authDate": {
+						"type": "integer"
+					},
+					"hash": {
+						"type": "string"
+					},
+					"role": {
+						"type": "string",
+						"description": "User role in the system"
+					},
+					"permissions": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						}
+					},
+					"featureFlags": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						}
+					},
+					"address": {
+						"type": "string",
+						"description": "User's wallet address"
+					},
+					"createdAt": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"updatedAt": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"meta": {
+						"type": "object",
+						"additionalProperties": {
+							"anyOf": [
+								{ "type": "string" },
+								{ "type": "number" },
+								{ "type": "boolean" }
+							],
+							"nullable": true
+						},
+						"description": "User metadata where keys are strings and values can be strings or numbers."
+					}
+				},
+				"required": [
+					"_id",
+					"id",
+					"firstName",
+					"address",
+					"hash",
+					"permissions",
+					"updatedAt",
+					"createdAt"
+				]
+			},
+			"UsersRequest": {
+				"type": "object",
+				"properties": {
+					"offset": {
+						"type": "integer",
+						"default": 0,
+						"description": "Number of users to skip"
+					},
+					"limit": {
+						"type": "integer",
+						"default": 10,
+						"description": "Maximum number of users to return"
+					},
+					"search": {
+						"type": "string",
+						"description": "Search term to filter users by name or username"
+					},
+					"report": {
+						"type": "string",
+						"enum": ["all", "with", "without"],
+						"default": "all",
+						"description": "Filter users by report status"
+					},
+					"measurement": {
+						"type": "string",
+						"enum": ["all", "with", "without"],
+						"default": "all",
+						"description": "Filter users by measurement status"
+					},
+					"status": {
+						"type": "string",
+						"enum": ["all", "new", "with balance", "without balance"],
+						"default": "all",
+						"description": "Filter users by status"
+					},
+					"archived": {
+						"type": "boolean",
+						"default": false,
+						"description": "Filter users by archived status"
+					}
+				}
+			},
+			"SwitchUserRequest": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"type": "string",
+						"description": "Target user _id (MongoDB ObjectId)"
+					},
+					"usersRequest": {
+						"$ref": "#/components/schemas/UsersRequest"
+					}
+				},
+				"required": ["id"]
+			},
+			"TransactionResponse": {
+				"type": "object",
+				"properties": {
+					"_id": {
+						"type": "string",
+						"description": "Unique identifier for the transaction"
+					},
+					"from": {
+						"type": "string",
+						"description": "Sender's identifier"
+					},
+					"to": {
+						"type": "string",
+						"description": "Receiver's identifier"
+					},
+					"symbol": {
+						"type": "string",
+						"description": "Currency symbol of the transaction"
+					},
+					"timestamp": {
+						"type": "integer",
+						"description": "Timestamp of the transaction in seconds since epoch"
+					},
+					"message": {
+						"type": "string",
+						"description": "Optional message associated with the transaction"
+					},
+					"value": {
+						"type": "number",
+						"description": "Amount of the transaction"
+					},
+					"__v": {
+						"type": "number",
+						"description": "Version of the transaction document"
+					}
+				},
+				"required": ["_id", "from", "to", "symbol", "timestamp", "value", "__v"]
+			},
+			"BalanceResponse": {
+				"type": "object",
+				"properties": {
+					"balance": {
+						"type": "number",
+						"description": "Current balance of the user"
+					}
+				},
+				"required": ["balance"]
+			},
+			"UpdateMetaRequest": {
+				"type": "object",
+				"properties": {
+					"meta": {
+						"type": "object",
+						"additionalProperties": {
+							"anyOf": [
+								{ "type": "string" },
+								{ "type": "number" },
+								{ "type": "boolean" }
+							],
+							"nullable": true
+						},
+						"description": "User metadata where keys are strings and values can be strings or numbers."
+					},
+					"userId": {
+						"type": "string",
+						"description": "ID of the user to update metadata for",
+						"pattern": "^[0-9a-fA-F]{24}$"
+					}
+				},
+				"required": ["meta"]
+			},
+			"UpdateFeatureFlagsRequest": {
+				"type": "object",
+				"properties": {
+					"featureFlags": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						},
+						"description": "Array of feature flags to update."
+					},
+					"userId": {
+						"type": "string",
+						"description": "ID of the user to update feature flags for",
+						"pattern": "^[0-9a-fA-F]{24}$"
+					}
+				},
+				"required": ["featureFlags"]
+			},
+			"GetUsersByAddressesRequest": {
+				"type": "object",
+				"required": ["addresses"],
+				"properties": {
+					"addresses": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						},
+						"minItems": 1,
+						"description": "Array of wallet addresses to search for. Must contain at least one address.",
+						"example": [
+							"0x6294C7251D145bbe9B2f529FdD6D5D42E1d0DeA4",
+							"0x7d1afa7b718fb893db30a3abc0cfc608aacfebb0"
+						]
+					}
+				}
+			},
+			"ErrorResponse": {
+				"type": "object",
+				"properties": {
+					"message": {
+						"type": "string",
+						"example": "Error message"
+					}
+				}
+			},
+			"LogoutResponse": {
+				"type": "object",
+				"properties": {
+					"message": {
+						"type": "string",
+						"example": "User logged out successfully"
+					}
+				}
+			},
+			"TelegramWebAppLoginRequest": {
+				"type": "object",
+				"required": ["hash", "authDate", "signature"],
+				"properties": {
+					"queryId": {
+						"type": "string",
+						"example": "AAEXTKEWAAAAABdMoRawpVCK"
+					},
+					"user": {
+						"type": "string",
+						"description": "JSON string containing user information",
+						"example": "{\"id\":379669527,\"first_name\":\"eugen\",\"last_name\":\"\",\"username\":\"theguriev\",\"language_code\":\"en\",\"allows_write_to_pm\":true,\"photo_url\":\"https://t.me/i/userpic/320/example.jpg\"}"
+					},
+					"receiver": {
+						"type": "string",
+						"description": "JSON string containing receiver information (fallback when user is not provided)",
+						"example": "{\"id\":379669527,\"first_name\":\"eugen\",\"last_name\":\"\",\"username\":\"theguriev\",\"language_code\":\"en\",\"allows_write_to_pm\":true,\"photo_url\":\"https://t.me/i/userpic/320/example.jpg\"}"
+					},
+					"authDate": {
+						"type": "integer",
+						"example": 1745179538
+					},
+					"signature": {
+						"type": "string",
+						"example": "zQf7zeXzKVekQpFT8Zxuf7_gxIuj3xAdo1ZtZn2_gEP4lHJgt0KUeBIEH6iAJp--n56H7ZHXYxco1zpW2a5CAA"
+					},
+					"hash": {
+						"type": "string",
+						"example": "217946472939261db8e248b313882b9ab3ed4e7ce5f1de25996d51aba52a1bfc"
+					},
+					"canSendAfter": {
+						"type": "integer",
+						"example": 1745179538
+					},
+					"chat": {
+						"type": "string"
+					},
+					"chatType": {
+						"type": "string",
+						"enum": ["sender", "private", "group", "supergroup", "channel"]
+					},
+					"chatInstance": {
+						"type": "string"
+					},
+					"startParam": {
+						"type": "string"
+					}
+				}
+			}
+		},
+		"securitySchemes": {
+			"cookieAuth": {
+				"type": "apiKey",
+				"in": "cookie",
+				"name": "accessToken"
+			}
+		}
+	}
 }
