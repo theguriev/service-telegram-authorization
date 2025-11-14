@@ -1,5 +1,5 @@
-import { v4 } from 'uuid'
+import { v4 } from "uuid";
 
-const issueRefreshToken = () => passwordHash(v4())
+const issueRefreshToken = () => passwordHash(v4());
 
-export default issueRefreshToken
+export default issueRefreshToken;
