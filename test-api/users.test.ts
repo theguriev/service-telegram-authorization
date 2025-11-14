@@ -2,6 +2,11 @@ import type { InferSchemaType } from "mongoose";
 import { adminId, regularId } from "../constants";
 import type schemaUser from "../db/schema/user";
 
+type User = Omit<InferSchemaType<typeof schemaUser>, "meta"> & {
+	_id: string;
+	meta: Record<string, string>;
+};
+
 const baseURL = process.env.API_URL;
 
 describe.sequential("GET /users API Endpoint", () => {
@@ -106,7 +111,7 @@ describe.sequential("GET /users API Endpoint", () => {
 					expect(response.status).toBe(200);
 					expect(Array.isArray(response._data)).toBe(true);
 					expect(response._data.length).toBeGreaterThanOrEqual(1);
-					response._data.forEach((user: InferSchemaType<typeof schemaUser>) => {
+					response._data.forEach((user: User) => {
 						const { username, firstName, lastName, meta } = user;
 						expect(
 							firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -184,7 +189,7 @@ describe.sequential("GET /users API Endpoint", () => {
 					expect(Array.isArray(response._data)).toBe(true);
 					expect(response._data.length).toBeGreaterThanOrEqual(1);
 					const hasAdminUser = response._data.some(
-						(user: InferSchemaType<typeof schemaUser>) => user.role === "admin",
+						(user: User) => user.role === "admin",
 					);
 					expect(hasAdminUser).toBe(true);
 				},
@@ -203,7 +208,7 @@ describe.sequential("GET /users API Endpoint", () => {
 					expect(response.status).toBe(200);
 					expect(Array.isArray(response._data)).toBe(true);
 					const hasSameUser = response._data.some(
-						(user: InferSchemaType<typeof schemaUser>) => user._id === adminId,
+						(user: User) => user._id === adminId,
 					);
 					expect(hasSameUser).toBe(false);
 				},
@@ -280,8 +285,8 @@ describe.sequential("POST /users/by-addresses API Endpoint", () => {
 			},
 			onResponse: ({ response }) => {
 				testUserAddresses = response._data
-					.filter((user: InferSchemaType<typeof schemaUser>) => user.address)
-					.map((user: InferSchemaType<typeof schemaUser>) => user.address)
+					.filter((user: User) => user.address)
+					.map((user: User) => user.address)
 					.slice(0, 3); // Take first 3 addresses
 			},
 		});
@@ -399,7 +404,7 @@ describe.sequential("POST /users/by-addresses API Endpoint", () => {
 					expect(response._data.length).toBeGreaterThan(0);
 
 					// Check that all returned users have addresses that were requested
-					response._data.forEach((user: InferSchemaType<typeof schemaUser>) => {
+					response._data.forEach((user: User) => {
 						expect(testUserAddresses).toContain(user.address);
 						expect(user).toHaveProperty("_id");
 						expect(user).not.toHaveProperty("privateKey"); // Should be excluded
@@ -811,21 +816,9 @@ describe.sequential("POST /users/switch API Endpoint", () => {
 	it("last switch should return 200 and admin user if switch info is correct", async () => {
 		if (!testUserId) return;
 		let responseData:
-			| Awaited<
-					ReturnType<
-						typeof $fetch.raw<
-							unknown,
-							"/users/switch/next",
-							{
-								baseURL: string;
-								method: "POST";
-								headers: {
-									Cookie: string;
-								};
-							}
-						>
-					>
-			  >["_data"]
+			| {
+					user: User;
+			  }
 			| undefined = undefined;
 
 		for (let i = 2; i < switchAccessTokenData.switchInfoLength; i++) {
