@@ -1,5 +1,5 @@
 export default [
-  "wallet:daily",
-  "wallet:daily-spend",
-  "wallet:manager-daily",
+	"wallet:daily",
+	"wallet:daily-spend",
+	"wallet:manager-daily",
 ] as const;

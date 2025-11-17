@@ -1,5 +1,5 @@
-import { model } from 'mongoose'
+import { model } from "mongoose";
 
-const Model = model('Switch Infos', schemaSwitchInfo)
+const Model = model("Switch Infos", schemaSwitchInfo);
 
-export default Model
+export default Model;
