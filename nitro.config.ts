@@ -24,13 +24,16 @@ export default defineNitroConfig({
   },
   imports: {
     imports: [
-      ...(await importsHelper("./db/model")),
-      ...(await importsHelper("./db/schema", camelCase)),
-      { name: "parse", from: "set-cookie-parser" },
-      { name: "destr", from: "destr" },
-      { name: "omit", from: "es-toolkit" },
-      { name: "v4", as: "uuidv4", from: "uuid" },
-      { name: "Wallet", from: "ethers" },
+        ...(await importsHelper("./db/model")),
+        ...(await importsHelper("./db/schema", camelCase)),
+        ...(await importsHelper("./server/permission", camelCase)),
+        { name: "v4", as: "uuidv4", from: "uuid" },
+        { name: "parse", from: "set-cookie-parser" },
+        { name: "destr", from: "destr" },
+        { name: "omit", from: "es-toolkit" },
+        { name: "Wallet", from: "ethers" },
+        { name: "can", from: "~/permission" },
+        { name: "matchCan", from: "~/permission" },
     ],
     presets: [
       {

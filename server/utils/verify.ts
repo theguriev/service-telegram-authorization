@@ -9,4 +9,4 @@ const verify = (token: string, secret:string, options?: VerifyOptions) => new Pr
   })
 })
 
-export default verify
+export default verify;

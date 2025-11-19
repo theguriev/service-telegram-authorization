@@ -1,5 +1,5 @@
-import { model } from 'mongoose'
+import { model } from "mongoose";
 
-const Model = model('Tokens', schemaToken)
+const Model = model("Tokens", schemaToken);
 
-export default Model
+export default Model;
