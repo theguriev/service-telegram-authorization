@@ -6,4 +6,5 @@ export default [
 	"get-all-users-transactions",
 	"update-all-users-meta",
 	"update-all-users-feature-flags",
+	"can-upload-video",
 ] as const;
