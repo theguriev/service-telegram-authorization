@@ -1,4 +1,4 @@
-import { regularId } from "../constants";
+import { regularId, testDeviceData } from "../constants";
 
 describe.sequential("Subscriptions", () => {
 	let adminAccessToken: string;
@@ -26,6 +26,7 @@ describe.sequential("Subscriptions", () => {
 			body: {
 				...body,
 				hash: generateTelegramHash(body, process.env.NITRO_BOT_TOKEN),
+				...testDeviceData,
 			},
 			onResponse: async ({ response }) => {
 				const setCookie = extractSetCookie(response.headers);

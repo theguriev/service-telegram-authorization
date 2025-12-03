@@ -1,5 +1,14 @@
+import { addMonths } from "date-fns";
 import { ObjectId } from "mongodb";
-import { adminId, regularId } from "./constants";
+import {
+	adminId,
+	adminToken,
+	adminTokenId,
+	regularId,
+	regularToken,
+	regularTokenId,
+	testDeviceData,
+} from "./constants";
 
 export const adminUserSeedData = {
 	_id: new ObjectId(adminId), // Specific ObjectId for admin
@@ -34,6 +43,26 @@ export const regularUserSeedData = {
 	},
 };
 
+export const adminUserTokenSeedData = {
+	_id: new ObjectId(adminTokenId),
+	token: adminToken,
+	userId: adminId,
+	role: "admin",
+	ipAddress: "127.0.0.1",
+	expiresIn: addMonths(new Date(), 1),
+	...testDeviceData,
+};
+
+export const regularUserTokenSeedData = {
+	_id: new ObjectId(regularTokenId),
+	token: regularToken,
+	userId: regularId,
+	role: "user",
+	ipAddress: "127.0.0.1",
+	expiresIn: addMonths(new Date(), 1),
+	...testDeviceData,
+};
+
 export async function clearTestData() {
 	try {
 		await ModelUser.deleteMany({});
@@ -52,6 +81,7 @@ export async function clearTestData() {
 export async function seedTestData() {
 	try {
 		await ModelUser.create([adminUserSeedData, regularUserSeedData]);
+		await ModelToken.create([adminUserTokenSeedData, regularUserTokenSeedData]);
 		console.log("\x1b[32m%s\x1b[0m", "✓", "Test database seeded successfully.");
 	} catch (error) {
 		console.error("Error seeding test database:", error);

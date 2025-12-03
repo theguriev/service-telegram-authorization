@@ -1,14 +1,38 @@
 const requestBodySchema = z.object({
 	id: z.string(),
 	usersRequest: usersRequestSchema.optional(),
+	os: z.enum(["windows", "linux", "macos", "android", "ios", "web"]),
+	application: z.string(),
+	fingerprint: z.string(),
+	source: z.string(),
+	refreshToken: z.string().optional(),
 });
 
 export default eventHandler(async (event) => {
 	const { currencySymbol } = useRuntimeConfig();
-	const { id: userId, usersRequest } = await zodValidateBody(
+	const {
+		id: userId,
+		usersRequest,
+		fingerprint,
+		source,
+		application,
+		os,
+	} = await zodValidateBody(event, requestBodySchema.parse);
+	const currentRefreshToken = await getRefreshToken(event);
+	const { requestNewTokens, canRefresh, removeTokens } = await useTokens(
 		event,
-		requestBodySchema.parse,
+		fingerprint,
+		currentRefreshToken,
 	);
+
+	if (!canRefresh) {
+		await removeTokens();
+		throw createError({
+			message: "Forbidden: can't refresh tokens",
+			status: 403,
+		});
+	}
+
 	const initialId = await getId(event);
 	if (!initialId) {
 		throw createError({ message: "Unauthorized", status: 401 });
@@ -52,8 +76,10 @@ export default eventHandler(async (event) => {
 			usersRequest: new Map(Object.entries(usersRequest)),
 		});
 
-		const { save, deleteByUserId } = useTokens({
-			event,
+		const { accessToken, refreshToken } = await requestNewTokens({
+			os,
+			source,
+			application,
 			userId,
 			id: initialId,
 			role: manager.role || "user",
@@ -63,18 +89,26 @@ export default eventHandler(async (event) => {
 				length: usersAfterId.length + 2,
 			},
 		});
-		await deleteByUserId();
-		await save();
+
+		return {
+			accessToken,
+			refreshToken,
+			user,
+		};
 	} else {
-		const { save, deleteByUserId } = useTokens({
-			event,
+		const { accessToken, refreshToken } = await requestNewTokens({
+			os,
+			source,
+			application,
 			userId,
 			id: initialId,
 			role: manager.role || "user",
 		});
-		await deleteByUserId();
-		await save();
-	}
 
-	return user;
+		return {
+			accessToken,
+			refreshToken,
+			user,
+		};
+	}
 });

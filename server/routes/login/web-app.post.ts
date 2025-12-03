@@ -12,11 +12,24 @@ const requestBodySchema = z.object({
 	chatInstance: z.string().optional(),
 	receiver: z.string().optional(),
 	startParam: z.string().optional(),
+	os: z.enum(["windows", "linux", "macos", "android", "ios", "web"]),
+	application: z.string(),
+	fingerprint: z.string(),
+	source: z.string(),
+	refreshToken: z.string().optional(),
 });
 
 export default eventHandler(async (event) => {
 	const { botToken } = useRuntimeConfig();
-	const validated = await zodValidateBody(event, requestBodySchema.parse);
+	const {
+		os,
+		application,
+		fingerprint,
+		source,
+		refreshToken: _refreshToken,
+		...validated
+	} = await zodValidateBody(event, requestBodySchema.parse);
+	const currentRefreshToken = await getRefreshToken(event);
 	const valid = isValidTelegramHash(validated, botToken, true);
 
 	const { user, receiver, authDate, hash } = validated;
@@ -65,14 +78,25 @@ export default eventHandler(async (event) => {
 		const userSaved = await userDocument.save();
 		const userId = userSaved._id.toString();
 		const role = userSaved.role || "user";
-		const { save } = useTokens({
+		const { requestNewTokens } = await useTokens(
 			event,
+			fingerprint,
+			currentRefreshToken,
+		);
+
+		const { accessToken, refreshToken } = await requestNewTokens({
 			userId,
+			os,
+			application,
+			source,
 			role,
 		});
-		save();
 
-		return userDocument;
+		return {
+			accessToken,
+			refreshToken,
+			user: userDocument,
+		};
 	}
 	const _id = userRecord._id.toString();
 	const role = userRecord.role || "user";
@@ -92,12 +116,23 @@ export default eventHandler(async (event) => {
 			},
 		},
 	);
-	const { save } = useTokens({
+	const { requestNewTokens } = await useTokens(
 		event,
+		fingerprint,
+		currentRefreshToken,
+	);
+
+	const { accessToken, refreshToken } = await requestNewTokens({
 		userId: _id,
+		os,
+		application,
+		source,
 		role,
-		id: _id,
 	});
-	save();
-	return ModelUser.findOne({ _id });
+
+	return {
+		accessToken,
+		refreshToken,
+		user: await ModelUser.findOne({ _id }),
+	};
 });
