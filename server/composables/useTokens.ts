@@ -74,7 +74,7 @@ const useTokens = async (
 			application,
 			ipAddress,
 			fingerprint,
-			expiresIn: expiresAccessToken,
+			expiresIn: expiresRefreshToken,
 			switchInfoId: switchInfo?.id,
 			switchInfoIndex: switchInfo?.index,
 			switchInfoLength: switchInfo?.length,
