@@ -13,6 +13,31 @@ const schema = new Schema(
 			default: "user",
 			required: true,
 		},
+		os: {
+			type: String,
+			enum: ["windows", "linux", "macos", "android", "ios", "web"],
+			required: true,
+		},
+		source: {
+			type: String,
+			required: true,
+		},
+		application: {
+			type: String,
+			required: true,
+		},
+		fingerprint: {
+			type: String,
+			required: true,
+		},
+		ipAddress: {
+			type: String,
+			required: true,
+		},
+		expiresIn: {
+			type: Date,
+			required: true,
+		},
 		switchInfoId: {
 			type: String,
 			ref: "Switch Infos",

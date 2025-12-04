@@ -1,7 +1,7 @@
 import type { EventHandlerRequest, H3Event } from "h3";
 
 const getSwitchInfo = async (event: H3Event<EventHandlerRequest>) => {
-	const accessToken = String(getCookie(event, "accessToken"));
+	const accessToken = getAccessToken(event);
 	const { secret } = useRuntimeConfig();
 	const { switchInfoId } = await verify(accessToken, secret);
 	if (!switchInfoId) {

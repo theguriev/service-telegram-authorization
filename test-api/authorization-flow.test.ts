@@ -1,5 +1,5 @@
 import type { FetchResponse } from "ofetch";
-import { regularId } from "../constants";
+import { regularId, testDeviceData } from "../constants";
 
 const body = {
 	id: 379669527,
@@ -62,6 +62,7 @@ describe.sequential("Authorization", () => {
 				body: {
 					...body,
 					hash: "invalid",
+					...testDeviceData,
 				},
 				onResponse: ({ response }) => {
 					expect(response.status).toBe(403);
@@ -77,10 +78,12 @@ describe.sequential("Authorization", () => {
 				body: {
 					...newBody,
 					hash: generateTelegramHash(newBody, process.env.NITRO_BOT_TOKEN),
+					...testDeviceData,
 				},
 				onResponse: ({ response }) => {
 					expect(response.status).toBe(200);
-					expect(response._data).toMatchObject(newBody);
+					expect(response._data).toHaveProperty("user");
+					expect(response._data.user).toMatchObject(newBody);
 				},
 			});
 		});
@@ -92,6 +95,7 @@ describe.sequential("Authorization", () => {
 				body: {
 					...body,
 					hash,
+					...testDeviceData,
 				},
 				onResponse: ({ response }) => {
 					const setCookie = extractSetCookie(response.headers);
@@ -103,12 +107,12 @@ describe.sequential("Authorization", () => {
 					);
 					validRefreshToken = refreshTokenObj.value;
 					validAccessToken = accessTokenObj.value;
-					expect(response.status).toBe(200);
-					expect(response._data).toMatchObject(body);
-					expect(response._data.privateKey).toBeUndefined();
-					expect(response._data.address).toBeDefined();
+					expect(response._data).toHaveProperty("user");
+					expect(response._data.user).toMatchObject(body);
+					expect(response._data.user.privateKey).toBeUndefined();
+					expect(response._data.user.address).toBeDefined();
 					accessAndRefreshToBeDefined(response);
-					validUserId = response._data._id;
+					validUserId = response._data.user._id;
 				},
 			});
 		});
@@ -122,10 +126,12 @@ describe.sequential("Authorization", () => {
 				body: {
 					...newBody,
 					hash: generateTelegramHash(newBody, process.env.NITRO_BOT_TOKEN),
+					...testDeviceData,
 				},
 				onResponse: ({ response }) => {
 					expect(response.status).toBe(200);
-					expect(response._data).toMatchObject(newBody);
+					expect(response._data).toHaveProperty("user");
+					expect(response._data.user).toMatchObject(newBody);
 					accessAndRefreshToBeDefined(response);
 				},
 			});
@@ -228,52 +234,59 @@ describe.sequential("Authorization", () => {
 						process.env.NITRO_BOT_TOKEN,
 						true,
 					),
+					...testDeviceData,
 				},
 				onResponse: ({ response }) => {
 					expect(response.status).toBe(200);
 					const userData = JSON.parse(newBody.user);
-					expect(response._data).toMatchObject({
+					expect(response._data).toHaveProperty("user");
+					expect(response._data.user).toMatchObject({
 						id: userData.id,
 						firstName: userData.firstName,
 						username: userData.username,
 					});
-					expect(response._data.privateKey).toBeUndefined();
-					expect(response._data.address).toBeDefined();
+					expect(response._data.user.privateKey).toBeUndefined();
+					expect(response._data.user.address).toBeDefined();
 					accessAndRefreshToBeDefined(response);
 				},
 			});
 		});
 	});
 
-	describe("GET /refresh", () => {
-		it("gets 404 on invalid refresh token", async () => {
+	describe("POST /refresh", () => {
+		it("gets 401 on invalid refresh token", async () => {
 			await $fetch("/refresh", {
+				method: "POST",
 				baseURL: process.env.API_URL,
 				headers: { Accept: "application/json" },
 				ignoreResponseError: true,
+				body: testDeviceData,
 				onResponse: ({ response }) => {
-					expect(response.status).toBe(404);
+					expect(response.status).toBe(401);
 					expect(response._data).toMatchObject({
-						message: "Refresh token not found!",
+						message: "Invalid refresh token!",
 					});
 				},
 			});
 		});
 		it("gets 200 on valid refresh token", async () => {
 			await $fetch("/refresh", {
+				method: "POST",
 				baseURL: process.env.API_URL,
 				headers: {
 					Accept: "application/json",
 					Cookie: `refreshToken=${validRefreshToken}`,
 				},
+				body: testDeviceData,
 				onResponse: async ({ response }) => {
 					expect(response.status).toBe(200);
 					const { accessToken } = accessAndRefreshToBeDefined(response);
 					const verified = await verify(accessToken, process.env.SECRET);
 					expect(verified.id).toBeDefined();
 					expect(verified.role).toBeDefined();
-					expect(response._data.privateKey).toBeUndefined();
-					expect(response._data.address).toBeDefined();
+					expect(response._data).toHaveProperty("user");
+					expect(response._data.user.privateKey).toBeUndefined();
+					expect(response._data.user.address).toBeDefined();
 				},
 			});
 		});

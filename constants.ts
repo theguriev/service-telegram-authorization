@@ -15,6 +15,19 @@ export const imports = [
 export const adminId = "6808bcfb77143eceb802c5a7";
 export const regularId = "6808bcfb77143eceb802c5a8";
 
+export const adminTokenId = "6808bcfb77143eceb802c5a9";
+export const regularTokenId = "6808bcfb77143eceb802c5a1";
+
+export const adminToken = "admin token";
+export const regularToken = "regular token";
+
+export const testDeviceData = {
+	os: "web",
+	application: "Mindrafted Test",
+	source: "Test",
+	fingerprint: "Test",
+};
+
 export const bllsBase = "https://api.blls.me";
 
 export const dateDifference = addHours(0, 3);

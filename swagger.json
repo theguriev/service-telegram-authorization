@@ -24,7 +24,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/UserResponse"
+									"$ref": "#/components/schemas/TokensResponse"
 								}
 							}
 						}
@@ -449,15 +449,25 @@
 			}
 		},
 		"/refresh": {
-			"get": {
+			"post": {
 				"summary": "Refresh user tokens",
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/RefreshRequest"
+							}
+						}
+					}
+				},
 				"responses": {
 					"200": {
 						"description": "Successful operation",
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/UserResponse"
+									"$ref": "#/components/schemas/TokensResponse"
 								}
 							}
 						}
@@ -550,8 +560,18 @@
 			}
 		},
 		"/logout": {
-			"get": {
+			"post": {
 				"summary": "Logout user",
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/LogoutRequest"
+							}
+						}
+					}
+				},
 				"responses": {
 					"200": {
 						"description": "Successful logout",
@@ -596,7 +616,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/UserResponse"
+									"$ref": "#/components/schemas/TokensResponse"
 								}
 							}
 						}
@@ -786,7 +806,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/UserResponse"
+									"$ref": "#/components/schemas/TokensResponse"
 								}
 							}
 						}
@@ -833,6 +853,16 @@
 				"summary": "Switch to next user in the switch sequence",
 				"description": "Switches to the next user in the admin switch sequence. Requires active switch session.",
 				"operationId": "switchToNextUser",
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/SwitchIterationRequest"
+							}
+						}
+					}
+				},
 				"responses": {
 					"200": {
 						"description": "Successfully switched to next user",
@@ -847,21 +877,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "object",
-									"properties": {
-										"status": {
-											"type": "string",
-											"enum": ["success", "return"],
-											"description": "Status of the switch operation"
-										},
-										"user": {
-											"$ref": "#/components/schemas/UserResponse"
-										},
-										"usersRequest": {
-											"$ref": "#/components/schemas/UsersRequest"
-										}
-									},
-									"required": ["status", "user"]
+									"$ref": "#/components/schemas/SwitchResponse"
 								}
 							}
 						}
@@ -930,21 +946,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "object",
-									"properties": {
-										"status": {
-											"type": "string",
-											"enum": ["success", "return"],
-											"description": "Status of the switch operation"
-										},
-										"user": {
-											"$ref": "#/components/schemas/UserResponse"
-										},
-										"usersRequest": {
-											"$ref": "#/components/schemas/UsersRequest"
-										}
-									},
-									"required": ["status", "user"]
+									"$ref": "#/components/schemas/SwitchResponse"
 								}
 							}
 						}
@@ -1126,9 +1128,39 @@
 					"hash": {
 						"type": "string",
 						"example": "abcdef123456"
+					},
+					"os": {
+						"type": "string",
+						"enum": ["windows", "linux", "macos", "android", "ios", "web"],
+						"example": "android"
+					},
+					"application": {
+						"type": "string",
+						"example": "Mindcrafted Mobile v1.0"
+					},
+					"fingerprint": {
+						"type": "string",
+						"example": "60c72b2f9b1e8b001c8e4d3a"
+					},
+					"source": {
+						"type": "string",
+						"example": "Google Pixel 9"
+					},
+					"refreshToken": {
+						"type": "string",
+						"example": "abcdef123456"
 					}
 				},
-				"required": ["id", "firstName", "authDate", "hash"]
+				"required": [
+					"id",
+					"firstName",
+					"authDate",
+					"hash",
+					"os",
+					"application",
+					"fingerprint",
+					"source"
+				]
 			},
 			"UserResponse": {
 				"type": "object",
@@ -1260,9 +1292,30 @@
 					},
 					"usersRequest": {
 						"$ref": "#/components/schemas/UsersRequest"
+					},
+					"os": {
+						"type": "string",
+						"enum": ["windows", "linux", "macos", "android", "ios", "web"],
+						"example": "android"
+					},
+					"application": {
+						"type": "string",
+						"example": "Mindcrafted Mobile v1.0"
+					},
+					"fingerprint": {
+						"type": "string",
+						"example": "60c72b2f9b1e8b001c8e4d3a"
+					},
+					"source": {
+						"type": "string",
+						"example": "Google Pixel 9"
+					},
+					"refreshToken": {
+						"type": "string",
+						"example": "abcdef123456"
 					}
 				},
-				"required": ["id"]
+				"required": ["id", "os", "application", "fingerprint", "source"]
 			},
 			"TransactionResponse": {
 				"type": "object",
@@ -1391,7 +1444,15 @@
 			},
 			"TelegramWebAppLoginRequest": {
 				"type": "object",
-				"required": ["hash", "authDate", "signature"],
+				"required": [
+					"hash",
+					"authDate",
+					"signature",
+					"os",
+					"application",
+					"fingerprint",
+					"source"
+				],
 				"properties": {
 					"queryId": {
 						"type": "string",
@@ -1435,8 +1496,135 @@
 					},
 					"startParam": {
 						"type": "string"
+					},
+					"os": {
+						"type": "string",
+						"enum": ["windows", "linux", "macos", "android", "ios", "web"],
+						"example": "android"
+					},
+					"application": {
+						"type": "string",
+						"example": "Mindcrafted Mobile v1.0"
+					},
+					"fingerprint": {
+						"type": "string",
+						"example": "60c72b2f9b1e8b001c8e4d3a"
+					},
+					"source": {
+						"type": "string",
+						"example": "Google Pixel 9"
+					},
+					"refreshToken": {
+						"type": "string",
+						"example": "abcdef123456"
 					}
 				}
+			},
+			"TokensResponse": {
+				"type": "object",
+				"properties": {
+					"accessToken": {
+						"type": "string"
+					},
+					"refreshToken": {
+						"type": "string"
+					},
+					"user": {
+						"$ref": "#/components/schemas/UserResponse"
+					}
+				},
+				"required": ["accessToken", "refreshToken", "user"]
+			},
+			"SwitchResponse": {
+				"type": "object",
+				"properties": {
+					"accessToken": {
+						"type": "string"
+					},
+					"refreshToken": {
+						"type": "string"
+					},
+					"status": {
+						"type": "string",
+						"enum": ["success", "return"],
+						"description": "Status of the switch operation"
+					},
+					"user": {
+						"$ref": "#/components/schemas/UserResponse"
+					},
+					"usersRequest": {
+						"$ref": "#/components/schemas/UsersRequest"
+					}
+				},
+				"required": ["accessToken", "refreshToken", "status", "user"]
+			},
+			"LogoutRequest": {
+				"type": "object",
+				"properties": {
+					"fingerprint": {
+						"type": "string",
+						"example": "60c72b2f9b1e8b001c8e4d3a"
+					},
+					"refreshToken": {
+						"type": "string",
+						"example": "abcdef123456"
+					}
+				},
+				"required": ["fingerprint"]
+			},
+			"RefreshRequest": {
+				"type": "object",
+				"properties": {
+					"os": {
+						"type": "string",
+						"enum": ["windows", "linux", "macos", "android", "ios", "web"],
+						"example": "android"
+					},
+					"application": {
+						"type": "string",
+						"example": "Mindcrafted Mobile v1.0"
+					},
+					"fingerprint": {
+						"type": "string",
+						"example": "60c72b2f9b1e8b001c8e4d3a"
+					},
+					"source": {
+						"type": "string",
+						"example": "Google Pixel 9"
+					},
+					"refreshToken": {
+						"type": "string",
+						"example": "abcdef123456"
+					}
+				},
+				"required": ["os", "application", "fingerprint", "source"]
+			},
+			"SwitchIterationRequest": {
+				"type": "object",
+				"properties": {
+					"os": {
+						"type": "string",
+						"enum": ["windows", "linux", "macos", "android", "ios", "web"],
+						"example": "android"
+					},
+					"application": {
+						"type": "string",
+						"example": "Mindcrafted Mobile v1.0"
+					},
+					"fingerprint": {
+						"type": "string",
+						"example": "60c72b2f9b1e8b001c8e4d3a"
+					},
+					"source": {
+						"type": "string",
+						"example": "Google Pixel 9"
+					},
+					"refreshToken": {
+						"type": "string",
+						"example": "abcdef123456"
+					}
+				},
+				"required": ["os", "application", "fingerprint", "source"]
 			}
 		},
 		"securitySchemes": {

@@ -1,7 +1,34 @@
 import getSwitchInfo from "~/utils/getSwitchInfo";
 import getSwitchInfoIndex from "~/utils/getSwitchInfoIndex";
 
+const requestBodySchema = z.object({
+	os: z.enum(["windows", "linux", "macos", "android", "ios", "web"]),
+	application: z.string(),
+	fingerprint: z.string(),
+	source: z.string(),
+	refreshToken: z.string().optional(),
+});
+
 export default eventHandler(async (event) => {
+	const { fingerprint, source, application, os } = await zodValidateBody(
+		event,
+		requestBodySchema.parse,
+	);
+	const currentRefreshToken = await getRefreshToken(event);
+	const { requestNewTokens, canRefresh, removeTokens } = await useTokens(
+		event,
+		fingerprint,
+		currentRefreshToken,
+	);
+
+	if (!canRefresh) {
+		await removeTokens();
+		throw createError({
+			message: "Forbidden: can't refresh tokens",
+			status: 403,
+		});
+	}
+
 	const userId = await getUserId(event);
 	const initialId = await getId(event);
 	if (!initialId) {
@@ -49,8 +76,10 @@ export default eventHandler(async (event) => {
 		throw createError({ message: "Previous user not found", status: 404 });
 	}
 
-	const { save, deleteByUserId } = useTokens({
-		event,
+	const { accessToken, refreshToken } = await requestNewTokens({
+		os,
+		source,
+		application,
 		userId: previousUserId,
 		id: initialId,
 		role: manager.role || "user",
@@ -60,10 +89,10 @@ export default eventHandler(async (event) => {
 			length: switchInfo.users.length + 2,
 		},
 	});
-	await deleteByUserId();
-	await save();
 
 	return {
+		accessToken,
+		refreshToken,
 		status: previousUserId === initialId ? "return" : "success",
 		user: previousUser,
 		usersRequest: switchInfo.usersRequest,

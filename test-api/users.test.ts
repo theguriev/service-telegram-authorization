@@ -1,5 +1,11 @@
 import type { InferSchemaType } from "mongoose";
-import { adminId, regularId } from "../constants";
+import {
+	adminId,
+	adminToken,
+	regularId,
+	regularToken,
+	testDeviceData,
+} from "../constants";
 import type schemaUser from "../db/schema/user";
 
 type User = Omit<InferSchemaType<typeof schemaUser>, "meta"> & {
@@ -495,9 +501,10 @@ describe.sequential("POST /users/switch API Endpoint", () => {
 			body: {
 				...body,
 				hash: generateTelegramHash(body, process.env.NITRO_BOT_TOKEN),
+				...testDeviceData,
 			},
 			onResponse: async ({ response }) => {
-				testUserId = response._data._id;
+				testUserId = response._data.user._id;
 			},
 		});
 	});
@@ -506,8 +513,14 @@ describe.sequential("POST /users/switch API Endpoint", () => {
 		await $fetch("/users/switch", {
 			baseURL,
 			method: "POST",
-			body: { id: testUserId },
+			body: {
+				id: testUserId,
+				...testDeviceData,
+			},
 			ignoreResponseError: true,
+			headers: {
+				Cookie: `refreshToken=${adminToken}`,
+			},
 			onResponse: ({ response }) => {
 				expect(response.status).toBe(500);
 			},
@@ -518,7 +531,10 @@ describe.sequential("POST /users/switch API Endpoint", () => {
 		await $fetch("/users/switch", {
 			baseURL,
 			method: "POST",
-			body: { id: testUserId },
+			body: {
+				id: testUserId,
+				...testDeviceData,
+			},
 			headers: {
 				Cookie: `accessToken=${regularAccessToken}`,
 			},
@@ -529,7 +545,7 @@ describe.sequential("POST /users/switch API Endpoint", () => {
 		});
 	});
 
-	it("should return 400 if userId is missing", async () => {
+	it("should return 400 if invalid input", async () => {
 		await $fetch("/users/switch", {
 			baseURL,
 			method: "POST",
@@ -547,9 +563,12 @@ describe.sequential("POST /users/switch API Endpoint", () => {
 		await $fetch("/users/switch", {
 			baseURL,
 			method: "POST",
-			body: { id: "000000000000000000000000" },
+			body: {
+				id: "000000000000000000000000",
+				...testDeviceData,
+			},
 			headers: {
-				Cookie: `accessToken=${adminAccessToken}`,
+				Cookie: `accessToken=${adminAccessToken}; refreshToken=${adminToken};`,
 			},
 			ignoreResponseError: true,
 			onResponse: ({ response }) => {
@@ -559,19 +578,21 @@ describe.sequential("POST /users/switch API Endpoint", () => {
 	});
 
 	let switchedAccessToken: string;
+	let switchedRefreshToken: string;
 
 	it("should switch tokens and return user if admin and user exists", async () => {
 		if (!testUserId) return;
 		await $fetch("/users/switch", {
 			baseURL,
 			method: "POST",
-			body: { id: testUserId },
+			body: { id: testUserId, ...testDeviceData },
 			headers: {
-				Cookie: `accessToken=${adminAccessToken}`,
+				Cookie: `accessToken=${adminAccessToken}; refreshToken=${adminToken};`,
 			},
 			onResponse: ({ response }) => {
 				expect(response.status).toBe(200);
-				expect(response._data).toHaveProperty("_id", testUserId);
+				expect(response._data).toHaveProperty("user");
+				expect(response._data.user).toHaveProperty("_id", testUserId);
 				const setCookie = extractSetCookie(response.headers);
 				const refreshTokenObj = setCookie.find(
 					(cookie) => cookie.name === "refreshToken",
@@ -581,6 +602,7 @@ describe.sequential("POST /users/switch API Endpoint", () => {
 				);
 				expect(refreshTokenObj).toBeDefined();
 				expect(accessTokenObj).toBeDefined();
+				switchedRefreshToken = refreshTokenObj.value;
 				switchedAccessToken = accessTokenObj.value;
 			},
 		});
@@ -606,9 +628,10 @@ describe.sequential("POST /users/switch API Endpoint", () => {
 			body: {
 				id: "000000000000000000000000",
 				usersRequest: {},
+				...testDeviceData,
 			},
 			headers: {
-				Cookie: `accessToken=${adminAccessToken}`,
+				Cookie: `accessToken=${adminAccessToken}; refreshToken=${switchedRefreshToken}`,
 			},
 			ignoreResponseError: true,
 			onResponse: ({ response }) => {
@@ -622,6 +645,10 @@ describe.sequential("POST /users/switch API Endpoint", () => {
 			baseURL,
 			method: "POST",
 			ignoreResponseError: true,
+			body: testDeviceData,
+			headers: {
+				Cookie: `refreshToken=${switchedRefreshToken};`,
+			},
 			onResponse: ({ response }) => {
 				expect(response.status).toBe(500);
 			},
@@ -633,6 +660,10 @@ describe.sequential("POST /users/switch API Endpoint", () => {
 			baseURL,
 			method: "POST",
 			ignoreResponseError: true,
+			body: testDeviceData,
+			headers: {
+				Cookie: `refreshToken=${switchedRefreshToken};`,
+			},
 			onResponse: ({ response }) => {
 				expect(response.status).toBe(500);
 			},
@@ -643,8 +674,9 @@ describe.sequential("POST /users/switch API Endpoint", () => {
 		await $fetch("/users/switch/previous", {
 			baseURL,
 			method: "POST",
+			body: testDeviceData,
 			headers: {
-				Cookie: `accessToken=${regularAccessToken}`,
+				Cookie: `accessToken=${regularAccessToken}; refreshToken=${regularToken};`,
 			},
 			ignoreResponseError: true,
 			onResponse: ({ response }) => {
@@ -657,8 +689,9 @@ describe.sequential("POST /users/switch API Endpoint", () => {
 		await $fetch("/users/switch/next", {
 			baseURL,
 			method: "POST",
+			body: testDeviceData,
 			headers: {
-				Cookie: `accessToken=${regularAccessToken}`,
+				Cookie: `accessToken=${regularAccessToken}; refreshToken=${regularToken};`,
 			},
 			ignoreResponseError: true,
 			onResponse: ({ response }) => {
@@ -671,8 +704,9 @@ describe.sequential("POST /users/switch API Endpoint", () => {
 		await $fetch("/users/switch/previous", {
 			baseURL,
 			method: "POST",
+			body: testDeviceData,
 			headers: {
-				Cookie: `accessToken=${adminAccessToken}`,
+				Cookie: `accessToken=${adminAccessToken}; refreshToken=${switchedRefreshToken};`,
 			},
 			ignoreResponseError: true,
 			onResponse: ({ response }) => {
@@ -685,8 +719,9 @@ describe.sequential("POST /users/switch API Endpoint", () => {
 		await $fetch("/users/switch/next", {
 			baseURL,
 			method: "POST",
+			body: testDeviceData,
 			headers: {
-				Cookie: `accessToken=${adminAccessToken}`,
+				Cookie: `accessToken=${adminAccessToken}; refreshToken=${switchedRefreshToken};`,
 			},
 			ignoreResponseError: true,
 			onResponse: ({ response }) => {
@@ -706,14 +741,16 @@ describe.sequential("POST /users/switch API Endpoint", () => {
 			body: {
 				id: regularId,
 				usersRequest: {},
+				...testDeviceData,
 			},
 			headers: {
-				Cookie: `accessToken=${adminAccessToken}`,
+				Cookie: `accessToken=${adminAccessToken}; refreshToken=${switchedRefreshToken};`,
 			},
 		});
 
 		expect(response.status).toBe(200);
-		expect(response._data).toHaveProperty("_id", regularId);
+		expect(response._data).toHaveProperty("user");
+		expect(response._data.user).toHaveProperty("_id", regularId);
 		const setCookie = extractSetCookie(response.headers);
 		const refreshTokenObj = setCookie.find(
 			(cookie) => cookie.name === "refreshToken",
@@ -723,6 +760,7 @@ describe.sequential("POST /users/switch API Endpoint", () => {
 		);
 		expect(refreshTokenObj).toBeDefined();
 		expect(accessTokenObj).toBeDefined();
+		switchedRefreshToken = refreshTokenObj.value;
 		switchedAccessToken = accessTokenObj.value;
 		switchAccessTokenData = await verify(switchedAccessToken, secret);
 		expect(switchAccessTokenData).toHaveProperty("userId", regularId);
@@ -738,8 +776,9 @@ describe.sequential("POST /users/switch API Endpoint", () => {
 		const response = await $fetch.raw("/users/switch/previous", {
 			baseURL,
 			method: "POST",
+			body: testDeviceData,
 			headers: {
-				Cookie: `accessToken=${switchedAccessToken}`,
+				Cookie: `accessToken=${switchedAccessToken}; refreshToken=${switchedRefreshToken};`,
 			},
 		});
 
@@ -756,6 +795,7 @@ describe.sequential("POST /users/switch API Endpoint", () => {
 		);
 		expect(refreshTokenObj).toBeDefined();
 		expect(accessTokenObj).toBeDefined();
+		switchedRefreshToken = refreshTokenObj.value;
 		switchedAccessToken = accessTokenObj.value;
 		switchAccessTokenData = await verify(switchedAccessToken, secret);
 		expect(switchAccessTokenData).toHaveProperty("userId", adminId);
@@ -770,8 +810,9 @@ describe.sequential("POST /users/switch API Endpoint", () => {
 		await $fetch("/users/switch/previous", {
 			baseURL,
 			method: "POST",
+			body: testDeviceData,
 			headers: {
-				Cookie: `accessToken=${switchedAccessToken}`,
+				Cookie: `accessToken=${switchedAccessToken}; refreshToken=${switchedRefreshToken};`,
 			},
 			ignoreResponseError: true,
 			onResponse: ({ response }) => {
@@ -785,8 +826,9 @@ describe.sequential("POST /users/switch API Endpoint", () => {
 		const response = await $fetch.raw("/users/switch/next", {
 			baseURL,
 			method: "POST",
+			body: testDeviceData,
 			headers: {
-				Cookie: `accessToken=${switchedAccessToken}`,
+				Cookie: `accessToken=${switchedAccessToken}; refreshToken=${switchedRefreshToken};`,
 			},
 		});
 
@@ -803,6 +845,7 @@ describe.sequential("POST /users/switch API Endpoint", () => {
 		);
 		expect(refreshTokenObj).toBeDefined();
 		expect(accessTokenObj).toBeDefined();
+		switchedRefreshToken = refreshTokenObj.value;
 		switchedAccessToken = accessTokenObj.value;
 		switchAccessTokenData = await verify(switchedAccessToken, secret);
 		expect(switchAccessTokenData).toHaveProperty("userId", regularId);
@@ -825,8 +868,9 @@ describe.sequential("POST /users/switch API Endpoint", () => {
 			const response = await $fetch.raw("/users/switch/next", {
 				baseURL,
 				method: "POST",
+				body: testDeviceData,
 				headers: {
-					Cookie: `accessToken=${switchedAccessToken}`,
+					Cookie: `accessToken=${switchedAccessToken}; refreshToken=${switchedRefreshToken};`,
 				},
 			});
 			responseData = response._data;
@@ -845,6 +889,7 @@ describe.sequential("POST /users/switch API Endpoint", () => {
 			);
 			expect(refreshTokenObj).toBeDefined();
 			expect(accessTokenObj).toBeDefined();
+			switchedRefreshToken = refreshTokenObj.value;
 			switchedAccessToken = accessTokenObj.value;
 			switchAccessTokenData = await verify(switchedAccessToken, secret);
 			expect(switchAccessTokenData).toHaveProperty("id", adminId);
