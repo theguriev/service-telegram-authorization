@@ -61,6 +61,7 @@ export default eventHandler(async (event) => {
 			index: currentUserIndex + 1,
 			length: switchInfo.users.length + 2,
 		},
+		user: nextUser,
 	});
 	await deleteByUserId();
 	await save();

@@ -62,6 +62,7 @@ export default eventHandler(async (event) => {
 				index: 1,
 				length: usersAfterId.length + 2,
 			},
+			user,
 		});
 		await deleteByUserId();
 		await save();
@@ -71,6 +72,7 @@ export default eventHandler(async (event) => {
 			userId,
 			id: initialId,
 			role: manager.role || "user",
+			user,
 		});
 		await deleteByUserId();
 		await save();

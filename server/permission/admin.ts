@@ -1,5 +1,17 @@
+import permissionTemplateManager from "./template-manager";
+import {
+	serviceMealsAdminExtras,
+	serviceRecipesAdminExtras,
+	serviceTelegramMessagesAdminExtras,
+	serviceVideosAdminPermissions,
+} from "./service-permissions";
+
 export default [
 	...permissionTemplateManager,
+	...serviceVideosAdminPermissions,
+	...serviceMealsAdminExtras,
+	...serviceRecipesAdminExtras,
+	...serviceTelegramMessagesAdminExtras,
 	"get-all-users",
 	"get-all-users-balance",
 	"continue-all-users-subscription",

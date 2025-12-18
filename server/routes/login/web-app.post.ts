@@ -69,6 +69,7 @@ export default eventHandler(async (event) => {
 			event,
 			userId,
 			role,
+			user: userSaved,
 		});
 		save();
 
@@ -97,6 +98,7 @@ export default eventHandler(async (event) => {
 		userId: _id,
 		role,
 		id: _id,
+		user: userRecord,
 	});
 	save();
 	return ModelUser.findOne({ _id });
