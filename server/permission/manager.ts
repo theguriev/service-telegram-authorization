@@ -1,3 +1,10 @@
+import {
+	serviceMealsManagerPermissions,
+	serviceMeasurementsManagerPermissions,
+	serviceRecipesManagerPermissions,
+	serviceTelegramMessagesManagerPermissions,
+} from "./service-permissions";
+
 export default [
 	"get-managed-users",
 	"get-managed-users-balance",
@@ -8,4 +15,8 @@ export default [
 	"switch-user",
 	"switch-previous-user",
 	"switch-next-user",
+	...serviceMealsManagerPermissions,
+	...serviceMeasurementsManagerPermissions,
+	...serviceRecipesManagerPermissions,
+	...serviceTelegramMessagesManagerPermissions,
 ] as const;

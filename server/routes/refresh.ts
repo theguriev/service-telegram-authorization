@@ -29,6 +29,7 @@ export default eventHandler(async (event) => {
 			index: oldRefreshTokenDocument.switchInfoIndex,
 			length: oldRefreshTokenDocument.switchInfoLength,
 		},
+		user,
 	});
 	await deleteByUserId();
 	await save();
