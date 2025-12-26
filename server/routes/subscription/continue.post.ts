@@ -6,14 +6,15 @@ const requestBodySchema = z.object({
 });
 
 export default eventHandler(async (event) => {
-	const { notificationBase, currencySymbol } = useRuntimeConfig();
-	const _id = await getId(event);
-	const user = await ModelUser.findOne({
-		_id,
-	}).select("+privateKey");
-	if (user === null) {
-		throw createError({ message: "User not exists", status: 409 });
-	}
+  const logger = await getLogger(event);
+  const { notificationBase, currencySymbol } = useRuntimeConfig();
+  const _id = await getId(event);
+  const user = await ModelUser.findOne({
+    _id,
+  }).select("+privateKey");
+  if (user === null) {
+    throw createError({ message: "User not exists", status: 409 });
+  }
 
 	const { receiver: receiverId } = await zodValidateBody(
 		event,
@@ -62,20 +63,17 @@ export default eventHandler(async (event) => {
 			`subscription-continue-${uuidv4()}`,
 		);
 
-		const days = plural(subscriptionDuration, "%d день", "%d дні", "%d днів");
-		try {
-			await sendNotification(
-				notificationBase,
-				md`*Вам була надана підписка на ${days}*`,
-				receiver.id,
-			);
-		} catch (error) {
-			console.error(
-				`Error sending notification after subscription continuation for user ${receiver._id}:`,
-				error,
-			);
-		}
-	}
+    const days = plural(subscriptionDuration, "%d день", "%d дні", "%d днів");
+    try {
+      await sendNotification(
+        notificationBase,
+        md`*Вам була надана підписка на ${days}*`,
+        receiver.id
+      );
+    } catch (error) {
+      logger.error({ message: `Error sending notification after subscription continuation for user ${receiver._id}`, error });
+    }
+  }
 
 	return {
 		success: true,

@@ -43,38 +43,39 @@ let teardownHappened = false;
 const presetTmpDir = getPresetTmpDir(preset);
 
 const ctx: Context = {
-	preset,
-	rootDir: fixtureDir,
-	outDir: resolve(fixtureDir, presetTmpDir, ".output"),
-	env: {
-		NITRO_BOT_TOKEN: "7826411058:AAEZYZPTy4hYe3WLDhhSL79VLMwvlw2JHbc",
-		NITRO_WALLET_PRIVATE_KEY:
-			"0x9383e92c466fa0da64f1892d3b761172641296543d4765128446009885268f95",
-		NITRO_NOTIFICATION_BASE: "http://localhost:4000",
-		NITRO_CURRENCY_SYMBOL: "nka",
-		CUSTOM_HELLO_THERE: "general",
-		SECRET: "gurievcreative",
-		PORT: "4000",
-		API_URL: "http://localhost:4000",
-		VALID_ADMIN_ACCESS_TOKEN: issueAccessToken(
-			{ userId: adminId, role: "admin", id: adminId },
-			{ secret: "gurievcreative" },
-		),
-		VALID_REGULAR_ACCESS_TOKEN: issueAccessToken(
-			{ userId: regularId, role: "user", id: regularId },
-			{ secret: "gurievcreative" },
-		),
-		VALID_ADMIN_ACCESS_TOKEN_WITH_REGULAR_ID: issueAccessToken(
-			{ userId: regularId, role: "admin", id: adminId },
-			{ secret: "gurievcreative" },
-		),
-	},
-	fetch: (url, opts): Promise<Response> =>
-		$fetch(joinURL(ctx.server!.url, url.slice(1)), {
-			redirect: "manual",
-			ignoreResponseError: true,
-			...(opts as object),
-		}),
+  preset,
+  rootDir: fixtureDir,
+  outDir: resolve(fixtureDir, presetTmpDir, ".output"),
+  env: {
+    NITRO_BOT_TOKEN: "7826411058:AAEZYZPTy4hYe3WLDhhSL79VLMwvlw2JHbc",
+    NITRO_WALLET_PRIVATE_KEY:
+      "0x9383e92c466fa0da64f1892d3b761172641296543d4765128446009885268f95",
+    NITRO_NOTIFICATION_BASE: "http://localhost:4000",
+    NITRO_CURRENCY_SYMBOL: "nka",
+    NITRO_LOKI_HOST: "http://localhost:3100",
+    CUSTOM_HELLO_THERE: "general",
+    SECRET: "gurievcreative",
+    PORT: "4000",
+    API_URL: "http://localhost:4000",
+    VALID_ADMIN_ACCESS_TOKEN: issueAccessToken(
+      { userId: adminId, role: "admin", id: adminId },
+      { secret: "gurievcreative" }
+    ),
+    VALID_REGULAR_ACCESS_TOKEN: issueAccessToken(
+      { userId: regularId, role: "user", id: regularId },
+      { secret: "gurievcreative" }
+    ),
+    VALID_ADMIN_ACCESS_TOKEN_WITH_REGULAR_ID: issueAccessToken(
+      { userId: regularId, role: "admin", id: adminId },
+      { secret: "gurievcreative" }
+    ),
+  },
+  fetch: (url, opts): Promise<Response> =>
+    $fetch(joinURL(ctx.server!.url, url.slice(1)), {
+      redirect: "manual",
+      ignoreResponseError: true,
+      ...(opts as any),
+    }),
 };
 
 let mongod: MongoMemoryServer;
